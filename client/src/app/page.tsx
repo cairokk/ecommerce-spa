@@ -1,8 +1,18 @@
+'use client'
 import Header from '@/components/Header'
 import { products } from '@/mock/products'
 import Link from 'next/link'
+import { useState } from 'react'
 
 export default function Home() {
+
+  const categories = ['Todos', 'Espresso', 'Cappuccino', 'Latte', 'Mocha']
+  const [selectedCategory, setSelectedCategory] = useState('Todos')
+
+  const filteredProducts = selectedCategory === 'Todos'
+    ? products
+    : products.filter((product) => product.category === selectedCategory)
+
   return (
     <>
       <Header />
@@ -12,7 +22,7 @@ export default function Home() {
           <p className="text-gray-600 mt-4 max-w-xl mx-auto md:mx-0">
             Lorem Ipsum Dolor Sit Amet, Consectetur Adipisicing Elit, Sed Do Eiusmod
           </p>
-          <Link href="/loja" className="w-[250px] items-center mt-8 justify-center flex bg-black text-white px-6 py-3 rounded hover:bg-gray-800 transition-colors duration-300">Comprar Agora
+          <Link href="/loja" className="md:w-[250px] w-full block items-center mt-8 justify-center md:flex bg-black text-white px-6 py-3 rounded hover:bg-gray-800 transition-colors duration-300">Comprar Agora
           </Link>
         </div>
         <div className="flex justify-center h-full md:justify-center mt-8 items-center md:mt-0 w-full bg-[#FAFAFA] p-6 rounded-lg">
@@ -21,17 +31,19 @@ export default function Home() {
       </section>
 
       <section className="bg-black py-6 flex justify-center h-20">
-       
+
       </section>
 
       <section className="px-6 py-12">
         <h2 className="text-2xl font-semibold text-center mb-8">— Mais vendidos —</h2>
 
         <div className="flex justify-center gap-4 mb-6 flex-wrap">
-          {['Espresso', 'Cappuccino', 'Latte', 'Mocha'].map((cat) => (
+          {categories.map((cat) => (
             <button
               key={cat}
-              className="border px-6 py-2 rounded hover:bg-black hover:text-white transition-colors duration-300 cursor-pointer"
+              onClick={() => setSelectedCategory(cat)}
+              className={`border px-6 py-2 rounded transition-colors duration-300 cursor-pointer ${selectedCategory === cat ? 'bg-black text-white' : 'hover:bg-black hover:text-white'
+                }`}
             >
               {cat}
             </button>
@@ -39,7 +51,7 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {products.map((product) => (
+          {filteredProducts.map((product) => (
             <div
               key={product.id}
               className="border rounded p-4 flex flex-col justify-center shadow relative hover:scale-105 transform transition duration-300 cursor-pointer"

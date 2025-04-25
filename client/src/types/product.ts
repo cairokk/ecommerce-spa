@@ -8,3 +8,7 @@ export interface Product {
     intensity: 'Leve' | 'Médio' | 'Forte';
     beans: 'Arábica' | 'Robusta' | 'Blend';
 }
+
+export interface CartProduct extends Product {
+    quantity: number;
+}

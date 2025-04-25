@@ -1,15 +1,21 @@
-import './globals.css'
-import { ReactNode } from 'react'
+// app/layout.tsx
+import { CartProvider } from '@/context/CartContext'  
+import Header from '@/components/Header' 
+import './globals.css' 
 
-export const metadata = {
-  title: 'Café Landing Page',
-  description: 'Awaken Your Senses With Every Sip.',
-};
-
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default function RootLayout({
+  children,  
+}: {
+  children: React.ReactNode
+}) {
   return (
-    <html lang="en">
-      <body>{children}</body>
-    </html>
-  );
+    <CartProvider> 
+      <html lang="pt-BR">
+        <body>
+          <Header /> 
+          {children}  
+        </body>
+      </html>
+    </CartProvider>
+  )
 }
