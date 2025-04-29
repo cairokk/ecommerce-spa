@@ -20,6 +20,17 @@ export default function Header() {
 
     const [scrolling, setScrolling] = useState(false)
     const [isCartOpen, setIsCartOpen] = useState(false)
+    const [userLogado, setUserLogado] = useState<String | null>("")
+
+    const logout = () => {
+        localStorage.removeItem('token');
+        setUserLogado(null);
+    }
+
+    const atualizarToken = () => {
+        const userLogado = localStorage.getItem('token');
+        setUserLogado(userLogado);
+    };
 
     useEffect(() => {
         const handleScroll = () => {
@@ -27,6 +38,14 @@ export default function Header() {
         }
         window.addEventListener('scroll', handleScroll)
         return () => window.removeEventListener('scroll', handleScroll)
+    }, [])
+
+    useEffect(() => {
+        window.addEventListener('storageUpdated', atualizarToken);
+        atualizarToken();
+        return () => {
+            window.removeEventListener('storageUpdated', atualizarToken);
+        };
     }, [])
 
     return (
@@ -43,10 +62,15 @@ export default function Header() {
                 </nav>
 
                 <div className="flex items-center gap-4">
-                    <div>
-                        <button onClick={goToLogin} className="bg-white text-black px-4 py-2 rounded border mx-2 cursor-pointer">Fazer Login</button>
-                        <button onClick={goToRegister} className="bg-black text-white px-4 py-2 rounded border cursor-pointer">Criar Conta</button>
-                    </div>
+                    {userLogado ?
+                        <div>
+                            <button onClick={logout} className="bg-white text-black px-4 py-2 rounded border mx-2 cursor-pointer">Logout</button>
+                        </div>
+                        :
+                        <div>
+                            <button onClick={goToLogin} className="bg-white text-black px-4 py-2 rounded border mx-2 cursor-pointer">Fazer Login</button>
+                            <button onClick={goToRegister} className="bg-black text-white px-4 py-2 rounded border cursor-pointer">Criar Conta</button>
+                        </div>}
                     <button
                         onClick={() => setIsCartOpen(true)}
                         className="text-2xl"

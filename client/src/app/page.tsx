@@ -15,7 +15,6 @@ export default function Home() {
 
   return (
     <>
-      <Header />
       <section className="flex flex-col md:flex-row h-[100vh] items-center justify-between w-full bg-white">
         <div className="text-center md:text-left md:w-2/3 md:px-12">
           <h1 className="text-6xl font-bold leading-tight">Desperte seus sentidos a cada gole</h1>

@@ -30,7 +30,7 @@ export default function Store() {
   
     return (
         <>
-            <Header />
+            {/* <Header /> */}
             <section className="flex flex-col md:flex-row h-[100vh] justify-between px-6 py-12 pt-24">
                 <div className="md:w-1/4 bg-gray-100 p-6 rounded-lg shadow-md">
                     <h2 className="text-xl font-semibold mb-6">Filtros</h2>

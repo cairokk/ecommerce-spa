@@ -2,13 +2,16 @@
 import Header from '@/components/Header';
 import { formatarCPF, validarCPF } from '@/utils/cpdUtils';
 import { formatarTelefone, validarTelefone } from '@/utils/telefoneUtils';
-import { useSearchParams } from 'next/navigation';
+import axios from 'axios';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+
 
 export default function Register() {
     const searchParams = useSearchParams();
-
+    const router = useRouter();
     const mode = searchParams.get('mode');
+    const [mensagem, setMensagem] = useState<String | undefined>();
 
     const [cpf, setCpf] = useState('');
     const [cpfError, setCpfError] = useState('');
@@ -88,11 +91,54 @@ export default function Register() {
 
         if (Object.keys(newErrors).length === 0) {
             // Aqui você poderia enviar os dados para seu backend
-            console.log('Dados enviados:', formData);
+
+            isLogin ? login(formData) : registrar(formData);
 
             submitted = false;
         }
     };
+
+    async function registrar(novoUserData: any) {
+
+        try {
+           await axios.post('http://localhost:8080/clientes/auth/registrar', formData, {
+                headers: {}
+            });
+            setIsLogin(true);
+            
+        } catch (erro) {
+            if (axios.isAxiosError(erro)) {
+                setMensagem(erro.response?.data as string || 'Erro desconhecido');
+              } else {
+                setMensagem('Erro inesperado');
+              }
+        }
+
+    }
+
+    async function login(loginData: any) {  
+        try {
+            const resposta = await axios.post('http://localhost:8080/clientes/auth/login', {
+                email: loginData.email,
+                senha: loginData.senha
+            }, {
+                headers: {}
+            });
+
+            const token = resposta.data.token;
+            localStorage.setItem('token', token);
+            window.dispatchEvent(new Event('storageUpdated'));
+            router.push('/loja')
+        } catch (erro) {
+            console.error('Erro ao enviar dados:', erro);
+            if (axios.isAxiosError(erro)) {
+                setMensagem(erro.response?.data as string || 'Erro desconhecido');
+              } else {
+                setMensagem('Erro inesperado');
+              }
+        }
+
+    }
 
     useEffect(() => {
         if (mode === 'login') {
@@ -102,10 +148,18 @@ export default function Register() {
         }
     }, [mode])
 
-    return (
-        < >
+    useEffect(() => {
+       setMensagem(undefined);
+        }, []);
 
-            <div className="min-h-screen flex items-center justify-center bg-black px-4 py-8 pt-20">
+    return (
+        <div className="bg-black pt-20 pb-4 pl-4 pr-4">
+            {mensagem &&
+                <div className="p-4 mb-4  text-sm text-red-800 rounded-lg bg-red-50 dark:bg-white-800 dark:text-red-400" role="alert">
+                    {mensagem}
+                </div>
+            }
+            <div className="min-h-screen flex items-center justify-center px-4 py-8 pt-20">
                 <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-sm">
                     <h2 className="text-2xl font-bold text-center mb-6">
                         {isLogin ? 'Entrar na conta' : 'Criar nova conta'}
@@ -229,6 +283,6 @@ export default function Register() {
                     </p>
                 </div>
             </div>
-        </>
+        </div>
     );
 }
