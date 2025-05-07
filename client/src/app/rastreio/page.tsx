@@ -10,6 +10,8 @@ const steps = [
   
 ];
 
+//Pagina não utilizada, passei pra id dinamico
+
 export default function Page() {
   return (
     <main className="w-full min-h-screen flex justify-center pt-28 bg-white px-4">

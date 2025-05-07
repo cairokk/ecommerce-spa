@@ -1,9 +1,7 @@
 'use client'
 import { useState } from 'react'
 import { products } from '@/mock/products'
-import Header from '@/components/Header'
 import ProductCard from '@/components/ProductCard'
-import { useCart } from '@/context/CartContext'
 
 export default function Store() {
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
@@ -26,11 +24,8 @@ export default function Store() {
         )
     })
 
-    const {cartItems, addToCart } = useCart() 
-  
     return (
         <>
-            {/* <Header /> */}
             <section className="flex flex-col md:flex-row h-[100vh] justify-between px-6 py-12 pt-24">
                 <div className="md:w-1/4 bg-gray-100 p-6 rounded-lg shadow-md">
                     <h2 className="text-xl font-semibold mb-6">Filtros</h2>
@@ -89,11 +84,7 @@ export default function Store() {
                     <h2 className="text-2xl font-semibold text-center mb-8">Todos os Produtos</h2>
                     <div className="grid grid-cols-1 px-8 sm:grid-cols-2 md:grid-cols-3 gap-6">
                         {filteredProducts.map((product) => (
-                            <ProductCard
-                                key={product.id}
-                                product={product}
-                                onAddToCart={addToCart}
-                            />
+                            <ProductCard key={product.id} product={product} />
                         ))}
                     </div>
                 </div>

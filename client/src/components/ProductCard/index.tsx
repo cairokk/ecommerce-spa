@@ -1,17 +1,24 @@
+'use client'
+
 import { Product } from '@/types/product'
 import { FaShoppingCart } from 'react-icons/fa'
+import { useCart } from '@/context/CartContext'
 
 interface ProductCardProps {
     product: Product
-    onAddToCart: (product: Product) => void
+    showLabel?: boolean
 }
 
-const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
+const ProductCard = ({ product, showLabel = false }: ProductCardProps) => {
+    const { addToCart } = useCart()
+
     return (
-        <div
-            key={product.id}
-            className="border rounded p-4 relative flex flex-col justify-center shadow hover:scale-105 transform transition duration-300 cursor-pointer"
-        >
+        <div className="border rounded p-4 relative flex flex-col justify-center shadow hover:scale-105 transform transition duration-300 cursor-pointer">
+            {showLabel && (
+                <span className="absolute top-2 left-0 bg-black text-white text-xs px-2 py-1 rounded-r shadow-md">
+                    Recomendado
+                </span>
+            )}
             <div className="w-full flex justify-center">
                 <img
                     src="/coffee-base.avif"
@@ -20,11 +27,15 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
                 />
             </div>
             <h3 className="font-semibold mb-2 text-center">{product.name}</h3>
-            <p className="text-gray-600 line-through text-center">R${product.originalPrice}</p>
-            <p className="font-bold text-lg text-center">R${product.discountedPrice}</p>
+            <p className="text-gray-600 line-through text-center">
+                R${product.originalPrice}
+            </p>
+            <p className="font-bold text-lg text-center">
+                R${product.discountedPrice}
+            </p>
             <button
-                className="absolute bottom-4 right-4 bg-black text-white rounded-full w-10 h-10 flex items-center justify-center"
-                onClick={() => onAddToCart(product)}
+                onClick={() => addToCart(product)}
+                className="absolute bottom-4 right-4 bg-black text-white rounded-full w-10 h-10 flex items-center justify-center transition-all duration-300 hover:bg-gray-800 hover:scale-110"
             >
                 <FaShoppingCart />
             </button>

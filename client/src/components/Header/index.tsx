@@ -5,11 +5,13 @@ import { useEffect, useState } from 'react'
 import { FiShoppingCart } from 'react-icons/fi'
 import CartSidebar from '../CartSidebar'
 import { useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
+import { motion } from 'framer-motion'
 
 export default function Header() {
 
     const router = useRouter();
-
+    const path = usePathname()
     const goToLogin = () => {
         router.push('/register?mode=login')
     };
@@ -17,10 +19,14 @@ export default function Header() {
     const goToRegister = () => {
         router.push('/register?mode=register')
     };
+    const navLinks = [
+        { label: 'Início /', path: '/' },
+        { label: 'Loja', path: '/loja' },
+        { label: 'Meus pedidos', path: '/pedidos' },
+    ]
 
-    const [scrolling, setScrolling] = useState(false)
     const [isCartOpen, setIsCartOpen] = useState(false)
-    const [userLogado, setUserLogado] = useState<String | null>("")
+    const [userLogado, setUserLogado] = useState<string | null>("")
 
     const logout = () => {
         localStorage.removeItem('token');
@@ -31,14 +37,6 @@ export default function Header() {
         const userLogado = localStorage.getItem('token');
         setUserLogado(userLogado);
     };
-
-    useEffect(() => {
-        const handleScroll = () => {
-            setScrolling(window.scrollY > 50)
-        }
-        window.addEventListener('scroll', handleScroll)
-        return () => window.removeEventListener('scroll', handleScroll)
-    }, [])
 
     useEffect(() => {
         window.addEventListener('storageUpdated', atualizarToken);
@@ -56,9 +54,25 @@ export default function Header() {
                 <div className="font-bold text-xl hidden md:flex">☕ Bleecker Café</div>
 
                 <nav className="flex items-center gap-6">
-                    <Link href="/">Inicio /</Link>
-                    <Link href="/loja">Loja</Link>
-                    <a href="#">Melhores ofertas</a>
+                    {navLinks.map((link) => (
+                        <Link
+                            key={link.label}
+                            href={link.path}
+                            className="relative hover:text-gray-600 transition-colors duration-300"
+                        >
+                            {link.label}
+                            {link.path === path && (
+                                <motion.span
+                                    layoutId="underline"
+                                    initial={{ opacity: 0, width: 0 }}
+                                    animate={{ opacity: 1, width: "100%" }}
+                                    exit={{ opacity: 0, width: 0 }}
+                                    transition={{ duration: 0.3 }}
+                                    className="absolute left-0 top-full block h-[1px] bg-black"
+                                />
+                            )}
+                        </Link>
+                    ))}
                 </nav>
 
                 <div className="flex items-center gap-4">
