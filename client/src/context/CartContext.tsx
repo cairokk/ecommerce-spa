@@ -7,7 +7,10 @@ interface Product {
     name: string
     originalPrice: number
     discountedPrice: number
+    origin: string
+    intensity: string
     category: string
+    beans: string
 }
 
 interface CartContextType {

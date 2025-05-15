@@ -3,14 +3,26 @@
 import { FiX } from 'react-icons/fi'
 import { FaTrashAlt } from 'react-icons/fa'
 import { useCart } from '@/context/CartContext' 
+import useCarrinhoStore from '../../app/stores/CarrinhoStore.js'
 
 interface CartSidebarProps {
   isOpen: boolean
   onClose: () => void
 }
 
+type CartItem = {
+  id: number;
+  name: string;
+  quantity: number;
+  discountedPrice: number;
+  price: number;
+  image: string;
+};
+
 export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
-  const { cartItems, removeFromCart } = useCart()
+  const { carrinho, removeProduto } = useCarrinhoStore((state) => state);
+  const cartItems:CartItem[] = carrinho?.produtos || []
+
 
   return (
     <>
@@ -50,7 +62,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                     </div>
                   </div>
                   <button
-                    onClick={() => removeFromCart(item.id)}
+                    onClick={() => removeProduto(item.id)}
                     className="text-red-500 hover:text-red-700"
                   >
                     <FaTrashAlt size={18} />

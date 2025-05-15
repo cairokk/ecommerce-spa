@@ -5,6 +5,8 @@ import { formatarTelefone, validarTelefone } from '@/utils/telefoneUtils';
 import axios from 'axios';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import usePerfilStore from '../stores/PerfilStore.js';
+
 
 
 export default function Register() {
@@ -18,6 +20,8 @@ export default function Register() {
 
     const [telefone, setTelefone] = useState('');
     const [telefoneError, setTelefoneError] = useState('');
+
+    const setPerfil = usePerfilStore((state) => state.setPerfil);
 
     const [isLogin, setIsLogin] = useState(true);
 
@@ -101,14 +105,14 @@ export default function Register() {
     async function registrar(novoUserData: any) {
 
         try {
-           await axios.post('http://localhost:8080/clientes/auth/registrar', formData, {
+           await axios.post('http://localhost:8084/clientes/auth/registrar', formData, {
                 headers: {}
             });
             setIsLogin(true);
             
         } catch (erro) {
             if (axios.isAxiosError(erro)) {
-                setMensagem(erro.response?.data as string || 'Erro desconhecido');
+                setMensagem(erro.response?.data.error as string || 'Erro desconhecido');
               } else {
                 setMensagem('Erro inesperado');
               }
@@ -118,7 +122,7 @@ export default function Register() {
 
     async function login(loginData: any) {  
         try {
-            const resposta = await axios.post('http://localhost:8080/clientes/auth/login', {
+            const resposta = await axios.post('http://localhost:8084/clientes/auth/login', {
                 email: loginData.email,
                 senha: loginData.senha
             }, {
@@ -126,8 +130,9 @@ export default function Register() {
             });
 
             const token = resposta.data.token;
-            localStorage.setItem('token', token);
-            window.dispatchEvent(new Event('storageUpdated'));
+            const perfil = {token: token};
+            setPerfil(perfil);
+            //window.dispatchEvent(new Event('storageUpdated'));
             router.push('/loja')
         } catch (erro) {
             console.error('Erro ao enviar dados:', erro);

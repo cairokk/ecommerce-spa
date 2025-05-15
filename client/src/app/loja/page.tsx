@@ -1,26 +1,50 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { products } from '@/mock/products'
 import ProductCard from '@/components/ProductCard'
+import useProdutoStore from '../stores/ProdutoStore'
+import axios from 'axios'
 
 export default function Store() {
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
     const [searchTerm, setSearchTerm] = useState<string>('')
     const [minPrice, setMinPrice] = useState<number>(0)
     const [maxPrice, setMaxPrice] = useState<number>(1000)
+    const { produtos, setProdutos } = useProdutoStore((state: any) => state)
+
 
     // Categorias, origens, intensidades e tipos de grãos para os filtros
     const categories = ['Espresso', 'Latte', 'Cappuccino', 'Mocha']
     //const origins = ['Brasil', 'Colômbia', 'Etiópia'];
     //const intensities = ['Leve', 'Médio', 'Forte'];
     //const beans = ['Arábica', 'Robusta'];
-    
-    const filteredProducts = products.filter((product) => {
+
+    async function getProdutos() {
+        try {
+            const resposta = await axios.get('http://localhost:8084/produtos', {
+                headers: {}
+            });
+            setProdutos(resposta.data);
+            console.log('Produtos recebidos:', resposta.data);
+            //window.dispatchEvent(new Event('storageUpdated'));
+        } catch (erro) {
+            console.error('Erro ao enviar dados:', erro);
+        }
+
+    }
+
+
+    useEffect(() => {
+        getProdutos();
+    }, [])
+
+
+    const filteredProducts = (produtos ? produtos : []).filter((produto: any) => {
         return (
-            (!selectedCategory || product.category === selectedCategory) &&
-            product.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-            product.discountedPrice >= minPrice &&
-            product.discountedPrice <= maxPrice
+            (!selectedCategory || produto?.category === selectedCategory) &&
+            produto?.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+            produto?.discountedPrice >= minPrice &&
+            produto?.discountedPrice <= maxPrice
         )
     })
 
@@ -83,7 +107,7 @@ export default function Store() {
                 <div className="md:w-3/4">
                     <h2 className="text-2xl font-semibold text-center mb-8">Todos os Produtos</h2>
                     <div className="grid grid-cols-1 px-8 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                        {filteredProducts.map((product) => (
+                        {filteredProducts.map((product: any) => (
                             <ProductCard key={product.id} product={product} />
                         ))}
                     </div>

@@ -7,11 +7,13 @@ import CartSidebar from '../CartSidebar'
 import { useRouter } from 'next/navigation'
 import { usePathname } from 'next/navigation'
 import { motion } from 'framer-motion'
+import usePerfilStore from '../../app/stores/PerfilStore.js'
 
 export default function Header() {
 
     const router = useRouter();
-    const path = usePathname()
+    const path = usePathname();
+    const { perfil, clearPerfil } = usePerfilStore((state) => state)
     const goToLogin = () => {
         router.push('/register?mode=login')
     };
@@ -26,25 +28,11 @@ export default function Header() {
     ]
 
     const [isCartOpen, setIsCartOpen] = useState(false)
-    const [userLogado, setUserLogado] = useState<string | null>("")
 
     const logout = () => {
         localStorage.removeItem('token');
-        setUserLogado(null);
+        clearPerfil(null);
     }
-
-    const atualizarToken = () => {
-        const userLogado = localStorage.getItem('token');
-        setUserLogado(userLogado);
-    };
-
-    useEffect(() => {
-        window.addEventListener('storageUpdated', atualizarToken);
-        atualizarToken();
-        return () => {
-            window.removeEventListener('storageUpdated', atualizarToken);
-        };
-    }, [])
 
     return (
         <>
@@ -76,7 +64,7 @@ export default function Header() {
                 </nav>
 
                 <div className="flex items-center gap-4">
-                    {userLogado ?
+                    {perfil?.token ?
                         <div>
                             <button onClick={logout} className="bg-white text-black px-4 py-2 rounded border mx-2 cursor-pointer">Logout</button>
                         </div>

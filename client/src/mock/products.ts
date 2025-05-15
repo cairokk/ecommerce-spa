@@ -4,6 +4,8 @@ import { Product } from '../types/product';
 export const products: Product[] = [
     {
         id: '1',
+        idFornecedor: 1,
+        quantidade: 0,
         name: 'Classic Espresso Roast',
         originalPrice: 399.0,
         discountedPrice: 299.0,
@@ -14,6 +16,8 @@ export const products: Product[] = [
     },
     {
         id: '2',
+        idFornecedor: 1,
+        quantidade: 10,
         name: 'Caramel Cappuccino Pods',
         originalPrice: 499.0,
         discountedPrice: 349.0,
@@ -24,6 +28,8 @@ export const products: Product[] = [
     },
     {
         id: '3',
+        idFornecedor: 1,
+        quantidade: 5,
         name: 'Vanilla Latte Blend',
         originalPrice: 599.0,
         discountedPrice: 399.0,
@@ -34,6 +40,8 @@ export const products: Product[] = [
     },
     {
         id: '4',
+        idFornecedor: 1,
+        quantidade: 2,
         name: 'Dark Roast Beans 500g',
         originalPrice: 699.0,
         discountedPrice: 549.0,
@@ -44,6 +52,8 @@ export const products: Product[] = [
     },
     {
         id: '5',
+        idFornecedor: 1,
+        quantidade: 0,
         name: 'Hazelnut Mocha Cups',
         originalPrice: 449.0,
         discountedPrice: 319.0,
@@ -54,6 +64,8 @@ export const products: Product[] = [
     },
     {
         id: '6',
+        idFornecedor: 1,
+        quantidade: 0,
         name: 'Iced Coffee Mix',
         originalPrice: 399.0,
         discountedPrice: 289.0,
