@@ -15,6 +15,7 @@ import {
 import { formatarCPF, validarCPF } from '@/utils/cpdUtils'
 import { formatarTelefone, validarTelefone } from '@/utils/telefoneUtils'
 import useThemeStore from '@/app/stores/ThemeStore'
+import Link from 'next/link'
 
 export default function RegisterPage() {
     const router = useRouter()
@@ -184,9 +185,9 @@ export default function RegisterPage() {
 
                 <p className="text-sm mt-6" style={{ color: isDark ? '#cccccc' : '#666666' }}>
                     Já tem uma conta?{' '}
-                    <a href="/login" className="underline font-medium">
+                    <Link href="/login" className="underline font-medium">
                         Entrar
-                    </a>
+                    </Link>
                 </p>
             </div>
         </div>

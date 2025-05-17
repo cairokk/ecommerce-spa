@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import usePerfilStore from '@/app/stores/PerfilStore'
 import { FiLogIn, FiMail, FiLock } from 'react-icons/fi'
 import useThemeStore from '@/app/stores/ThemeStore'
+import Link from 'next/link'
 
 export default function LoginPage() {
     const router = useRouter()
@@ -110,9 +111,9 @@ export default function LoginPage() {
 
                 <p className="text-sm mt-6" style={{ color: isDark ? '#cccccc' : '#666666' }}>
                     Ainda não tem uma conta?{' '}
-                    <a href="/register" className="underline font-medium">
+                    <Link href="/register" className="underline font-medium">
                         Cadastre-se
-                    </a>
+                    </Link>
                 </p>
             </div>
         </div>
