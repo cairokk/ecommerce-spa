@@ -4,4 +4,45 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
+
+}
+@font-face {
+  font-family: 'TrenchSlab';
+  src: url('/fonts/TrenchSlab-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'TrenchSlab';
+  src: url('/fonts/TrenchSlab-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'TrenchSlab';
+  src: url('/fonts/TrenchSlab-Italic.woff') format('woff');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'TrenchSlab';
+  src: url('/fonts/TrenchSlab-BoldItalic.woff') format('woff');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PorterSans';
+  src: url('/fonts/porter-sans.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
 }

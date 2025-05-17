@@ -1,118 +1,155 @@
 'use client'
+
 import { useEffect, useState } from 'react'
-import { products } from '@/mock/products'
+import { products as produtos } from '@/mock/products'
 import ProductCard from '@/components/ProductCard'
-import useProdutoStore from '../stores/ProdutoStore'
+import useThemeStore from '@/app/stores/ThemeStore'
 import axios from 'axios'
+import { FiSearch } from 'react-icons/fi'
 
 export default function Store() {
-    const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+    const [selectedCategories, setSelectedCategories] = useState<string[]>([])
     const [searchTerm, setSearchTerm] = useState<string>('')
-    const [minPrice, setMinPrice] = useState<number>(0)
-    const [maxPrice, setMaxPrice] = useState<number>(1000)
-    const { produtos, setProdutos } = useProdutoStore((state: any) => state)
+    const { theme } = useThemeStore()
+    const isDark = theme === 'dark'
+    //const { produtos, setProdutos } = useProdutoStore((state: any) => state)
 
-
-    // Categorias, origens, intensidades e tipos de grãos para os filtros
     const categories = ['Espresso', 'Latte', 'Cappuccino', 'Mocha']
-    //const origins = ['Brasil', 'Colômbia', 'Etiópia'];
-    //const intensities = ['Leve', 'Médio', 'Forte'];
-    //const beans = ['Arábica', 'Robusta'];
 
     async function getProdutos() {
         try {
             const resposta = await axios.get('http://localhost:8084/produtos', {
                 headers: {}
             });
-            setProdutos(resposta.data);
+            //setProdutos(resposta.data);
             console.log('Produtos recebidos:', resposta.data);
             //window.dispatchEvent(new Event('storageUpdated'));
         } catch (erro) {
-            console.error('Erro ao enviar dados:', erro);
+            console.error('Erro ao enviar dados:', erro)
         }
-
     }
 
-
     useEffect(() => {
-        getProdutos();
+        getProdutos()
     }, [])
 
+    const toggleCategory = (category: string) => {
+        setSelectedCategories((prev) =>
+            prev.includes(category) ? prev.filter((c) => c !== category) : [...prev, category]
+        )
+    }
 
-    const filteredProducts = (produtos ? produtos : []).filter((produto: any) => {
+    const clearFilters = () => {
+        setSelectedCategories([])
+        setSearchTerm('')
+    }
+
+    const filteredProducts = (produtos ?? []).filter((produto: any) => {
         return (
-            (!selectedCategory || produto?.category === selectedCategory) &&
-            produto?.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-            produto?.discountedPrice >= minPrice &&
-            produto?.discountedPrice <= maxPrice
+            (selectedCategories.length === 0 || selectedCategories.includes(produto.category)) &&
+            produto.name.toLowerCase().includes(searchTerm.toLowerCase())
         )
     })
 
+    const hasFilters = selectedCategories.length > 0 || searchTerm !== ''
+
     return (
-        <>
-            <section className="flex flex-col md:flex-row h-[100vh] justify-between px-6 py-12 pt-24">
-                <div className="md:w-1/4 bg-gray-100 p-6 rounded-lg shadow-md">
-                    <h2 className="text-xl font-semibold mb-6">Filtros</h2>
-                    <div className="mb-6">
-                        <h3 className="text-lg font-semibold">Categoria</h3>
-                        <div className="flex flex-wrap gap-2">
-                            {categories.map((category) => (
-                                <button
-                                    key={category}
-                                    onClick={() => setSelectedCategory(category)}
-                                    className={`border px-4 py-2 rounded hover:bg-black hover:text-white transition-colors duration-300 cursor-pointer ${selectedCategory === category ? 'bg-black text-white' : ''}`}
-                                >
-                                    {category}
-                                </button>
-                            ))}
-                            <button
-                                onClick={() => setSelectedCategory(null)}
-                                className={`border px-4 py-2 rounded hover:bg-black hover:text-white transition-colors duration-300 cursor-pointer ${!selectedCategory ? 'bg-black text-white' : ''}`}
-                            >
-                                Todos
-                            </button>
-                        </div>
-                    </div>
-                    <div className="mb-6">
-                        <h3 className="text-lg font-semibold">Buscar por Nome</h3>
+        <section
+            className="min-h-[100vh] pt-20 pb-12 px-4 sm:px-6"
+            style={{
+                color: isDark ? '#ffffff' : '#000000',
+                backgroundColor: isDark ? '#030303' : '#ffffff',
+                transition: 'background-color 0.3s ease, color 0.3s ease',
+            }}
+        >
+            <div
+                className="rounded-lg p-6 mb-8"
+                style={{
+                    backgroundColor: isDark ? '#0D1015' : '#f5f5f5',
+                    transition: 'background-color 0.3s ease',
+                }}
+            >
+                <div className="text-start mb-8">
+                    <h2 className="text-4xl font-bold">Todos Os Produtos</h2>
+                    <p
+                        className="text-sm mt-2"
+                        style={{ opacity: 0.8, color: isDark ? '#cccccc' : '#555555' }}
+                    >
+                        Descubra Todos Os Produtos Disponíveis
+                    </p>
+                </div>
+
+                <div className="flex justify-center mb-4">
+                    <div className="relative w-full">
+                        <FiSearch
+                            className="absolute left-4 top-1/2 -translate-y-1/2 text-xl"
+                            style={{
+                                color: isDark ? '#FFA500' : '#888888',
+                            }}
+                        />
                         <input
                             type="text"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            placeholder="Digite o nome do café"
-                            className="border px-4 py-2 w-full rounded mb-4"
+                            placeholder="Faça Sua Pesquisa Aqui"
+                            className="pl-12 pr-4 py-3 w-full rounded-lg border-none text-sm shadow focus:outline-none"
+                            style={{
+                                backgroundColor: isDark ? '#ebebeb' : '#ebebeb',
+                                color: isDark ? '#2c2c2c' : '#000000',
+                                transition: 'background-color 0.3s ease, color 0.3s ease',
+                            }}
                         />
                     </div>
+                </div>
+            </div>
 
-                    <div className="mb-6">
-                        <h3 className="text-lg font-semibold">Preço</h3>
-                        <div>
-                            <input
-                                type="number"
-                                value={minPrice}
-                                onChange={(e) => setMinPrice(Number(e.target.value))}
-                                placeholder="Preço Mínimo"
-                                className="border px-4 py-2 w-full rounded mb-4"
-                            />
-                            <input
-                                type="number"
-                                value={maxPrice}
-                                onChange={(e) => setMaxPrice(Number(e.target.value))}
-                                placeholder="Preço Máximo"
-                                className="border px-4 py-2 w-full rounded"
-                            />
-                        </div>
+            <div
+                className="rounded-lg p-6 mb-8"
+                style={{
+                    backgroundColor: isDark ? '#0D1015' : '#f5f5f5',
+                    transition: 'background-color 0.3s ease',
+                }}
+            >
+                <div className="flex flex-wrap justify-between items-center mb-8 gap-4">
+                    <div className="flex flex-wrap gap-2">
+                        {categories.map((cat) => {
+                            const isSelected = selectedCategories.includes(cat)
+                            return (
+                                <button
+                                    key={cat}
+                                    onClick={() => toggleCategory(cat)}
+                                    className={`px-5 py-2 rounded-full text-sm font-medium border transition-colors duration-300 ${isSelected
+                                            ? 'bg-[#8EA4DF] text-white border-transparent'
+                                            : isDark
+                                                ? 'bg-[#535D77] text-[#e1e1e1] border-gray-600 hover:bg-[#8EA4DF]'
+                                                : 'bg-[#e0e0e0] text-[#222222] border-gray-400 hover:bg-[#8EA4DF] hover:text-white'
+                                        }`}
+                                >
+                                    {cat}
+                                </button>
+                            )
+                        })}
                     </div>
+                    {hasFilters && (
+                        <button
+                            onClick={clearFilters}
+                            className="px-4 py-2 rounded-full text-sm border transition-all duration-300"
+                            style={{
+                                borderColor: isDark ? '#555555' : '#cccccc',
+                                color: isDark ? '#ffffff' : '#000000',
+                                backgroundColor: isDark ? 'transparent' : '#f1f1f1',
+                            }}
+                        >
+                            Limpar Filtros
+                        </button>
+                    )}
                 </div>
-                <div className="md:w-3/4">
-                    <h2 className="text-2xl font-semibold text-center mb-8">Todos os Produtos</h2>
-                    <div className="grid grid-cols-1 px-8 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                        {filteredProducts.map((product: any) => (
-                            <ProductCard key={product.id} product={product} />
-                        ))}
-                    </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                    {filteredProducts.map((product: any) => (
+                        <ProductCard key={product.id} product={product} showLabel />
+                    ))}
                 </div>
-            </section>
-        </>
+            </div>
+        </section>
     )
 }
