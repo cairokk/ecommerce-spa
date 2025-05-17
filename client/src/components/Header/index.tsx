@@ -1,7 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
 import { FiShoppingCart } from 'react-icons/fi'
 import CartSidebar from '../CartSidebar'
 import { useRouter } from 'next/navigation'
@@ -11,6 +10,7 @@ import usePerfilStore from '../../app/stores/PerfilStore.js'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faMoon, faSun } from '@fortawesome/free-regular-svg-icons'
 import useThemeStore from '../../app/stores/ThemeStore'
+import useCarrinhoStore from '@/app/stores/CarrinhoStore'
 
 export default function Header() {
     const router = useRouter()
@@ -19,7 +19,7 @@ export default function Header() {
     const { theme, toggleTheme } = useThemeStore()
 
     const goToLogin = () => router.push('/login')
-    const [isCartOpen, setIsCartOpen] = useState(false)
+    const { setIsCartOpen } = useCarrinhoStore((state) => state)
 
     const logout = () => {
         localStorage.removeItem('token')

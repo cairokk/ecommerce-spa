@@ -27,24 +27,8 @@ export default function CartSidebar() {
   const isDark = theme === 'dark'
 
   const cartItems: CartItem[] = carrinho?.produtos || []
+  const { diminuirQuantidade } = useCarrinhoStore((state) => state)
 
-  const diminuirQuantidade = (id: number) => {
-    const produtos = [...carrinho.produtos]
-    const index = produtos.findIndex((p) => p.id === id)
-
-    if (index !== -1) {
-      if (produtos[index].quantidade > 1) {
-        produtos[index].quantidade -= 1
-      } else {
-        produtos.splice(index, 1)
-      }
-    }
-
-    const total = produtos.reduce((acc, item) => acc + item.discountedPrice * item.quantidade, 0)
-    const quantidade = produtos.reduce((acc, item) => acc + item.quantidade, 0)
-
-    setCarrinho({ produtos, total, quantidade })
-  }
 
   return (
     <>
