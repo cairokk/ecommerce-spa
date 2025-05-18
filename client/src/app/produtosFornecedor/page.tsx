@@ -165,8 +165,12 @@ export default function ProdutosFornecedorPage() {
                                                 <div className="text-sm text-gray-400 line-through">R$ {produto.originalPrice.toFixed(2)}</div>
                                             </td>
                                             <td className="p-3 text-lg font-semibold">{produto.quantidade}</td>
-                                            <td className="p-3 flex items-center justify-center h-full">
-                                                <button onClick={() => handleDelete(produto.id)} className="text-red-500 text-xl hover:text-red-600"><FiTrash2 /></button>
+                                            <td className="p-0">
+                                                <div className="w-full h-full flex items-center justify-center">
+                                                    <div className="w-full h-full flex items-start justify-start ">
+                                                        <button onClick={() => handleDelete(produto.id)} className="text-red-500 text-xl hover:text-red-600"><FiTrash2 /></button>
+                                                    </div>
+                                                </div>
                                             </td>
                                         </tr>
                                     ))}
