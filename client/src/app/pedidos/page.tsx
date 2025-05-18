@@ -1,40 +1,75 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import useThemeStore from '@/app/stores/ThemeStore'
+import usePerfilStore from '@/app/stores/PerfilStore'
+import usePedidoStore from '@/app/stores/PedidoStore'
+import axios from 'axios'
 
-const pedidosMock = [
-    {
-        id: 1,
-        name: 'Capsulas nespresso',
-        image: '/coffee-base.avif',
-        price: 2999.0,
-        originalPrice: 4999.0,
-        status: 'Feito',
-    },
-    {
-        id: 2,
-        name: 'Café Orfeu Gourmet',
-        image: '/coffee-base.avif',
-        price: 199.9,
-        originalPrice: 299.9,
-        status: 'Andamento',
-    },
-];
+interface OrderItem {
+    productId: number;
+    quantity: number;
+}
 
-const statusOptions = ['Todos', 'Feito', 'Andamento', 'Entregue'];
+interface EnderecoEntrega {
+    rua: string;
+    numero: string;
+    complemento?: string;
+    bairro: string;
+    cidade: string;
+    estado: string;
+    cep: string;
+}
+
+interface Pedido {
+    id: number;
+    customerId: number;
+    items: OrderItem[];
+    totalPrice: number;
+    payMethod: number;
+    enderecoEntrega: EnderecoEntrega;
+    status: 'CRIADO' | 'PAGO' | 'ENVIADO' | 'ENTREGUE' | 'CANCELADO';
+}
+
+const statusOptions = ['Todos', 'CRIADO', 'PAGO', 'ENVIADO', 'ENTREGUE', 'CANCELADO'];
 
 export default function PedidosPage() {
     const [statusFilter, setStatusFilter] = useState('Todos')
     const router = useRouter()
     const { theme } = useThemeStore()
     const isDark = theme === 'dark'
+    const { perfil, getIdFromToken } = usePerfilStore((state) => state)
+    const { pedidos, setPedidos } = usePedidoStore((state) => state)
+
+    const token = perfil?.token;
+    const userID = getIdFromToken();
+
+    useEffect(() => {
+        if (!token || !userID) {
+            router.push('/login');
+            return;
+        }
+        fetchPedidos();
+    }, [token, userID])
+
+    const fetchPedidos = async () => {
+        try {
+            const resposta = await axios.get(`http://localhost:8084/pedidos/usuario/${userID}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            setPedidos(resposta.data);
+        } catch (erro) {
+            console.error('Erro ao buscar pedidos:', erro)
+        }
+    };
 
     const pedidosFiltrados = statusFilter === 'Todos'
-        ? pedidosMock
-        : pedidosMock.filter(pedido => pedido.status === statusFilter)
+        ? pedidos
+        : pedidos.filter(pedido => pedido.status === statusFilter)
 
     return (
         <main
@@ -61,53 +96,55 @@ export default function PedidosPage() {
                                     : 'hover:bg-black hover:text-white border-gray-300 text-black'
                             }`}
                     >
-                        {status.toUpperCase()}
+                        {status}
                     </button>
                 ))}
             </div>
 
             <div className="space-y-6">
-                {pedidosFiltrados.map((pedido) => (
-                    <div
-                        key={pedido.id}
-                        className="flex items-center justify-between border rounded-xl p-4 shadow-sm hover:shadow-md transition"
-                        style={{
-                            backgroundColor: isDark ? '#1f1f1f' : '#f9f9f9',
-                            borderColor: isDark ? '#333333' : '#e5e5e5',
-                        }}
-                    >
-                        <div className="flex items-center min-h-[100px] gap-4">
-                            <Image
-                                src={pedido.image}
-                                alt={pedido.name}
-                                width={120}
-                                height={120}
-                                className="object-contain rounded"
-                            />
-                            <div>
-                                <h3 className="text-lg font-semibold">{pedido.name}</h3>
-                                <div className="flex items-center gap-2">
-                                    <p className={`font-bold ${isDark ? 'text-white' : 'text-black'}`}>
-                                        R$ {pedido.price.toFixed(2)}
-                                    </p>
-                                    <p className="line-through text-gray-500 text-sm">
-                                        R$ {pedido.originalPrice.toFixed(2)}
-                                    </p>
+                {pedidosFiltrados && pedidosFiltrados.length > 0 ?
+                    pedidosFiltrados.map((pedido: Pedido) => (
+                        <div
+                            key={pedido.id}
+                            className="flex items-center justify-between border rounded-xl p-4 shadow-sm hover:shadow-md transition"
+                            style={{
+                                backgroundColor: isDark ? '#1f1f1f' : '#f9f9f9',
+                                borderColor: isDark ? '#333333' : '#e5e5e5',
+                            }}
+                        >
+                            <div className="flex items-center min-h-[100px] gap-4">
+                                <Image
+                                    src={'/coffee-base.avif'}
+                                    alt={'Pedido #' + pedido.id}
+                                    width={120}
+                                    height={120}
+                                    className="object-contain rounded"
+                                />
+                                <div>
+                                    <h3 className="text-lg font-semibold">Pedido #{pedido.id}</h3>
+                                    <p>Status: <strong>{pedido.status}</strong></p>
+                                    <div className="flex items-center gap-2">
+                                        <p className={`font-bold ${isDark ? 'text-white' : 'text-black'}`}>
+                                            R$ {pedido.totalPrice.toFixed(2)}
+                                        </p>
+                                    </div>
+                                    <p className="text-sm">Itens: {pedido.items.length}</p>
                                 </div>
                             </div>
-                        </div>
 
-                        <button
-                            onClick={() => router.push(`/pedidos/${pedido.id}`)}
-                            className={`px-4 py-2 rounded-full transition-all ${isDark
+                            <button
+                                onClick={() => router.push(`/pedidos/${pedido.id}`)}
+                                className={`px-4 py-2 rounded-full transition-all ${isDark
                                     ? 'bg-white text-black hover:bg-gray-300'
                                     : 'bg-black text-white hover:bg-gray-800'
-                                }`}
-                        >
-                            →
-                        </button>
-                    </div>
-                ))}
+                                    }`}
+                            >
+                                →
+                            </button>
+                        </div>
+                    ))
+                    : <p>Nenhum pedido encontrado.</p>
+                }
             </div>
         </main>
     )

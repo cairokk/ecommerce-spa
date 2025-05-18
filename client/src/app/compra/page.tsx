@@ -10,6 +10,7 @@ import { FiPlus, } from 'react-icons/fi'
 import { PiQrCodeBold } from 'react-icons/pi'
 import ProtectedRoute from '@/components/ProtectedRoute'
 import useEnderecoStore from '@/app/stores/EnderecoStore'
+import usePerfilStore from '@/app/stores/PerfilStore'
 import {
     validarEnderecoCompleto,
     obterCamposComErro,
@@ -25,6 +26,7 @@ import {
 import { useRef, useEffect } from 'react'
 import useThemeStore from '@/app/stores/ThemeStore'
 import { FiTrash2 } from 'react-icons/fi'
+import axios from 'axios'
 
 export default function CompraPage() {
     const {
@@ -81,6 +83,9 @@ export default function CompraPage() {
     const [modalAberto, setModalAberto] = useState(false)
     const [produtoParaRemover, setProdutoParaRemover] = useState<string | null>(null)
     const [errosEndereco, setErrosEndereco] = useState<{ [key: string]: boolean }>({})
+    const { perfil, getIdFromToken } = usePerfilStore((state) => state)
+    const token = perfil?.token;
+    const userID = getIdFromToken(token)
 
 
     const cartaoRef = useRef<HTMLButtonElement | null>(null)
@@ -130,22 +135,29 @@ export default function CompraPage() {
         const { id, ...enderecoSemId } = enderecoSelecionado || {};
 
         const pedidoPayload = {
-            produtos: produtosSelecionados.map(p => ({
-                id: p.id,
-                quantidade: p.quantidade,
+            customerId: userID,
+            items: produtosSelecionados.map(p => ({
+                productId: p.id,
+                quantity: p.quantidade,
             })),
-            total: totalSelecionado,
-            metodoPagamento: metodoPagamento === 'cartao' ? 1 : 2,
+            totalPrice: totalSelecionado,
+            payMethod: metodoPagamento === 'cartao' ? 1 : 2,
             cartao: metodoPagamento === 'cartao' && cartaoSelecionado ? {
                 numero: cartaoSelecionado.numero,
                 nome: cartaoSelecionado.nomeTitular,
                 validade: cartaoSelecionado.validade,
                 cvv: cartaoSelecionado.cvv,
             } : null,
-            endereco: enderecoSemId,
+            enderecoEntrega: enderecoSemId,
         }
 
-        console.log('Pedido enviado:', pedidoPayload)
+        const response = await axios.post(
+                `http://localhost:8084/pedidos`, pedidoPayload, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                }
+            });
         // Aqui deixar a chamada  pra api 
 
         clearCarrinho()

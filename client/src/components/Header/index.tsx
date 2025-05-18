@@ -15,7 +15,7 @@ import useCarrinhoStore from '@/app/stores/CarrinhoStore'
 export default function Header() {
     const router = useRouter()
     const path = usePathname()
-    const { perfil, clearPerfil } = usePerfilStore((state) => state)
+    const { perfil, clearPerfil, getRoleFromToken } = usePerfilStore((state) => state)
     const { theme, toggleTheme } = useThemeStore()
 
     const goToLogin = () => router.push('/login')
@@ -24,13 +24,15 @@ export default function Header() {
     const logout = () => {
         localStorage.removeItem('token')
         clearPerfil(null)
-    }
+    }  
+
+    const isFornecedor = getRoleFromToken(perfil?.token) === 'FORNECEDOR'
 
     const navLinks = [
         { label: 'Início', path: '/' },
         { label: 'Loja', path: '/loja' },
-        { label: 'Meus pedidos', path: '/pedidos' },
-        ...(perfil?.token ? [{ label: 'Meus Produtos', path: '/produtosFornecedor' }] : [])
+        ...(perfil?.token ? [{ label: 'Meus pedidos', path: '/pedidos' }] : []),
+        ...((perfil?.token && isFornecedor) ? [{ label: 'Meus Produtos', path: '/produtosFornecedor' }] : [])
 
     ]
 

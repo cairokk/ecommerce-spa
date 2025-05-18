@@ -23,7 +23,6 @@ export default function Store() {
                 headers: {}
             });
             setProdutos(resposta.data);
-            console.log('Produtos recebidos:', resposta.data);
             //window.dispatchEvent(new Event('storageUpdated'));
         } catch (erro) {
             console.error('Erro ao enviar dados:', erro)

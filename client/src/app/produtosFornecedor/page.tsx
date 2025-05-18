@@ -53,10 +53,6 @@ export default function ProdutosFornecedorPage() {
     const categories = ['Espresso', 'Latte', 'Cappuccino', 'Mocha']
 
     useEffect(() => {
-        console.log('Perfil:', perfil)
-        console.log('Token:', perfil?.token)
-        console.log('ID do Fornecedor:', getIdFromToken())
-
         fetchProdutos()
     }, [])
 
@@ -118,33 +114,7 @@ export default function ProdutosFornecedorPage() {
         }))
     }
 
-// funcao para atualizar item no banco quando tiver o fluxo de editar
-    const atualizarItem = async (produtoAtualizado) => {
-        try {
-            const novoProduto: Product = {
-                ...form,
-                idFornecedor: fornecedorId
-            }
 
-            const response = await axios.put(
-                'http://localhost:8084/produtos', produtoAtualizado, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}` // se necessário
-                }
-            });
-            console.log('Produto atualizado:', response.data)
-
-            setProdutos(prev => [...prev, novoProduto])
-            setForm({
-                id: '', name: '', originalPrice: 0, discountedPrice: 0,
-                category: 'Espresso', origin: '', quantidade: 0,
-                intensity: 'Leve', beans: 'Arábica'
-            })
-        } catch (err) {
-            console.error('Erro ao cadastrar produto:', err)
-        }
-    }
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         try {
@@ -160,7 +130,6 @@ export default function ProdutosFornecedorPage() {
                     Authorization: `Bearer ${token}` // se necessário
                 }
             });
-            console.log('Produto cadastrado:', response.data)
 
             setProdutos(prev => [...prev, novoProduto])
             setForm({
@@ -181,7 +150,6 @@ export default function ProdutosFornecedorPage() {
                     Authorization: `Bearer ${token}`
                 }
             })
-            console.log('Produto deletado:', id)
 
             setProdutos(produtos.filter(p => p.id !== id))
         } catch (err) {
@@ -206,18 +174,35 @@ export default function ProdutosFornecedorPage() {
     }
     const salvarNovaQuantidade = async () => {
         if (!produtoEditandoId) return;
-        await atualizarProduto(produtoEditandoId, { quantidade: novaQuantidade });
-        setProdutoEditandoId(null);
-    }
 
-    const atualizarProduto = async (id: string, camposAtualizados: Partial<Product>) => {
+        const produtoOriginal = produtos.find(p => p.id === produtoEditandoId);
+        if (!produtoOriginal) return;
+
+        const produtoAtualizado = {
+            ...produtoOriginal,
+            quantidade: novaQuantidade
+        };
+
+        await atualizarProduto(produtoEditandoId, produtoAtualizado);
+        setProdutoEditandoId(null);
+    };
+
+    const atualizarProduto = async (id: string, produtoAtualizado: Product) => {
+
+
         try {
-            // colocar aq a chamada pra api
-            console.log(`Atualizando produto ${id}:`, camposAtualizados)
+            const response = await axios.put(
+                `http://localhost:8084/produtos/${id}`, produtoAtualizado, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}` // se necessário
+                }
+            });
+     
 
             setProdutos((prev) =>
                 prev.map((produto) =>
-                    produto.id === id ? { ...produto, ...camposAtualizados } : produto
+                    produto.id === id ? { ...produto, ...produtoAtualizado } : produto
                 )
             )
         } catch (error) {

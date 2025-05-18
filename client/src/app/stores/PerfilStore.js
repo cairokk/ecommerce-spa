@@ -13,12 +13,24 @@ const usePerfilStore = create(
 
       try {
         const payload = decodeJwtPayload(token);
-        return payload?.fornecedorId || payload?.id || null;
+        return payload?.id || null;
       } catch (e) {
         console.error("Token inválido:", e);
         return null;
       }
-    }
+    },
+    getRoleFromToken: () => {
+      const token = get().perfil?.token;
+      if (!token) return null;
+
+      try {
+        const payload = decodeJwtPayload(token);
+        return payload?.role || null;
+      } catch (e) {
+        console.error("Token inválido:", e);
+        return null;
+      }
+    },
   }))
 );
 
