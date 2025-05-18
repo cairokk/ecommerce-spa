@@ -1,8 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { products as produtos } from '@/mock/products'
+//import { products as produtos } from '@/mock/products'
 import ProductCard from '@/components/ProductCard'
+import useProdutoStore from '@/app/stores/ProdutoStore'
 import useThemeStore from '@/app/stores/ThemeStore'
 import axios from 'axios'
 import { FiSearch } from 'react-icons/fi'
@@ -12,7 +13,7 @@ export default function Store() {
     const [searchTerm, setSearchTerm] = useState<string>('')
     const { theme } = useThemeStore()
     const isDark = theme === 'dark'
-    //const { produtos, setProdutos } = useProdutoStore((state: any) => state)
+    const { produtos, setProdutos } = useProdutoStore((state: any) => state)
 
     const categories = ['Espresso', 'Latte', 'Cappuccino', 'Mocha']
 
@@ -21,7 +22,7 @@ export default function Store() {
             const resposta = await axios.get('http://localhost:8084/produtos', {
                 headers: {}
             });
-            //setProdutos(resposta.data);
+            setProdutos(resposta.data);
             console.log('Produtos recebidos:', resposta.data);
             //window.dispatchEvent(new Event('storageUpdated'));
         } catch (erro) {
