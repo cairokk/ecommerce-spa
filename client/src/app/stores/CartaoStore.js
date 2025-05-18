@@ -17,7 +17,16 @@ const useCartaoStore = create(
                     },
                 ],
             })),
-    }))
+        removerCartao: (id) =>
+        set((state) => {
+            const novosCartoes = state.cartoes.filter((c) => c.id !== id)
+            const novoSelecionado = state.selecionado === id ? null : state.selecionado
+            return {
+                cartoes: novosCartoes,
+                selecionado: novosCartoes.some(c => c.id === novoSelecionado) ? novoSelecionado : null,
+            }
+        }),
+}))
 )
 
 export default useCartaoStore

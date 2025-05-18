@@ -9,14 +9,22 @@ import useCartaoStore from '@/app/stores/CartaoStore'
 import { FiPlus, } from 'react-icons/fi'
 import { PiQrCodeBold } from 'react-icons/pi'
 import ProtectedRoute from '@/components/ProtectedRoute'
+import useEnderecoStore from '@/app/stores/EnderecoStore'
+import {
+    validarEnderecoCompleto,
+    obterCamposComErro,
+    formatarCEP,
+} from '../../utils/enderecoUtils'
 
 import {
     formatarNumeroCartao,
     formatarValidade,
     formatarCVV,
+    validarCartaoCompleto,
 } from '../../utils/cartaoUtils';
 import { useRef, useEffect } from 'react'
 import useThemeStore from '@/app/stores/ThemeStore'
+import { FiTrash2 } from 'react-icons/fi'
 
 export default function CompraPage() {
     const {
@@ -26,20 +34,53 @@ export default function CompraPage() {
         clearCarrinho
     } = useCarrinhoStore((state) => state)
 
-    const { cartoes, adicionarCartao, selecionado, selecionarCartao } = useCartaoStore()
+    const { cartoes, adicionarCartao, selecionado, selecionarCartao, removerCartao } = useCartaoStore()
+    const { enderecos, adicionarEndereco, selecionadoEndereco, selecionarEndereco, removerEndereco } = useEnderecoStore()
 
     const [metodoPagamento, setMetodoPagamento] = useState<'cartao' | 'pix'>('cartao')
     const [selectedIds, setSelectedIds] = useState<number[]>(carrinho.produtos.map(p => p.id))
     const [mostrarFormulario, setMostrarFormulario] = useState(false)
+    const [mostrarFormularioEndereco, setMostrarFormularioEndereco] = useState(false)
+
     const [nomeTitular, setNomeTitular] = useState('')
     const [numero, setNumero] = useState('')
     const [validade, setValidade] = useState('')
     const [cvv, setCvv] = useState('')
 
+    const [novoEndereco, setNovoEndereco] = useState({
+        cep: '', cidade: '', rua: '', numero: '', bairro: '', complemento: '', estado: ''
+    })
+
+    const handleChangeEndereco = (e) => {
+        const { name, value } = e.target;
+
+        const camposNumericos = ['cep', 'numero'];
+        const camposSomenteTexto = ['cidade', 'bairro', 'estado'];
+
+        let novoValor = value;
+
+        if (camposNumericos.includes(name)) {
+            novoValor = value.replace(/\D/g, '');
+            if (name === 'cep' && novoValor.length > 8) novoValor = novoValor.slice(0, 8);
+            if (name === 'cep' && novoValor.length === 8) {
+                novoValor = novoValor.replace(/(\d{5})(\d{3})/, '$1-$2');
+            }
+        }
+
+        if (camposSomenteTexto.includes(name)) {
+            novoValor = value.replace(/[^a-zA-ZÀ-ÿ\s]/g, '');
+        }
+
+        setNovoEndereco((prev) => ({ ...prev, [name]: novoValor }));
+    };
+
+
+
     const router = useRouter()
 
     const [modalAberto, setModalAberto] = useState(false)
     const [produtoParaRemover, setProdutoParaRemover] = useState<string | null>(null)
+    const [errosEndereco, setErrosEndereco] = useState<{ [key: string]: boolean }>({})
 
 
     const cartaoRef = useRef<HTMLButtonElement | null>(null)
@@ -79,27 +120,33 @@ export default function CompraPage() {
             alert('Selecione um cartão para prosseguir com o pagamento.')
             return
         }
+        if (!selecionadoEndereco) {
+            alert('Selecione um endereço para prosseguir com o pagamento.')
+            return
+        }
 
         const cartaoSelecionado = cartoes.find(c => c.id === selecionado)
+        const enderecoSelecionado = enderecos.find(e => e.id === selecionadoEndereco)
+        const { id, ...enderecoSemId } = enderecoSelecionado || {};
 
         const pedidoPayload = {
             produtos: produtosSelecionados.map(p => ({
                 id: p.id,
                 quantidade: p.quantidade,
-                precoUnitario: p.discountedPrice,
             })),
             total: totalSelecionado,
-            metodoPagamento,
+            metodoPagamento: metodoPagamento === 'cartao' ? 1 : 2,
             cartao: metodoPagamento === 'cartao' && cartaoSelecionado ? {
                 numero: cartaoSelecionado.numero,
-                nomeTitular: cartaoSelecionado.nomeTitular,
+                nome: cartaoSelecionado.nomeTitular,
                 validade: cartaoSelecionado.validade,
                 cvv: cartaoSelecionado.cvv,
-            } : null
+            } : null,
+            endereco: enderecoSemId,
         }
 
         console.log('Pedido enviado:', pedidoPayload)
-    // Aqui deixar a chamada  pra api 
+        // Aqui deixar a chamada  pra api 
 
         clearCarrinho()
         alert('Pedido confirmado com sucesso!')
@@ -109,7 +156,7 @@ export default function CompraPage() {
 
     return (
         <ProtectedRoute>
-            <main className={`min-h-screen pt-28 px-4 md:px-20 flex flex-col md:flex-row gap-8 ${isDark ? 'bg-gradient-to-b from-[#0f0f0f] to-[#1e1e1e] text-white' : 'bg-gray-100 text-black'}`}>
+            <main className={`min-h-screen pt-28 px-4 pb-5 md:px-20 flex flex-col md:flex-row gap-8 ${isDark ? 'bg-gradient-to-b from-[#0f0f0f] to-[#1e1e1e] text-white' : 'bg-gray-100 text-black'}`}>
                 <div className="flex-1 space-y-6">
                     <h1 className="text-2xl font-bold">Finalizar Compras</h1>
 
@@ -202,19 +249,30 @@ export default function CompraPage() {
                         {metodoPagamento === 'cartao' && (
                             <div className={`${isDark ? 'bg-[#2C323B]' : 'bg-gray-200'} p-4 rounded-md space-y-4`}>
                                 {cartoes.map((cartao) => (
-                                    <button
+                                    <div
                                         key={cartao.id}
-                                        onClick={() => selecionarCartao(cartao.id)}
-                                        className={`flex items-center gap-4 ${isDark ? 'bg-[#39424E]' : 'bg-white'} shadow-xl rounded-md p-3 w-full text-left transition border 
-                                    ${selecionado === cartao.id ? 'border-yellow-400' : 'border-transparent'}`}
+                                        className={`flex items-center justify-between ${isDark ? 'bg-[#39424E]' : 'bg-white'} shadow-xl rounded-md p-3 w-full text-left transition border 
+                                        ${selecionado === cartao.id ? 'border-yellow-400' : 'border-transparent'}`}
                                     >
-                                        <div className="w-10 h-6 bg-purple-600 rounded-sm" />
-                                        <div>
-                                            <p className={`text-sm font-medium ${isDark ? 'text-white' : 'text-black'}`}>{cartao.nomeTitular}</p>
-                                            <p className="text-gray-400 text-xs">•••• {cartao.numero.slice(-4)} - {cartao.validade}</p>
-                                        </div>
-                                    </button>
+                                        <button
+                                            onClick={() => selecionarCartao(cartao.id)}
+                                            className="flex items-center gap-4 w-full text-left"
+                                        >
+                                            <div className="w-10 h-6 bg-purple-600 rounded-sm" />
+                                            <div>
+                                                <p className={`text-sm font-medium ${isDark ? 'text-white' : 'text-black'}`}>{cartao.nomeTitular}</p>
+                                                <p className="text-gray-400 text-xs">•••• {cartao.numero.slice(-4)} - {cartao.validade}</p>
+                                            </div>
+                                        </button>
+                                        <button
+                                            onClick={() => removerCartao(cartao.id)}
+                                            className="ml-4 text-red-400 hover:text-red-600"
+                                        >
+                                            <FiTrash2 size={18} />
+                                        </button>
+                                    </div>
                                 ))}
+
                                 <button
                                     onClick={() => setMostrarFormulario(true)}
                                     className={`flex items-center gap-4 transition ${isDark ? 'text-indigo-300 hover:text-indigo-400' : 'text-gray-700 hover:text-black'}`}
@@ -229,8 +287,20 @@ export default function CompraPage() {
                                     <form
                                         onSubmit={(e) => {
                                             e.preventDefault()
-                                            adicionarCartao({ nomeTitular, numero, validade, cvv })
+
+                                            const cartao = { nomeTitular, numero, validade, cvv }
+
+                                            if (!validarCartaoCompleto(cartao)) {
+                                                alert('Por favor, preencha todos os campos corretamente do cartão.')
+                                                return
+                                            }
+
+                                            adicionarCartao(cartao)
                                             setMostrarFormulario(false)
+                                            setNomeTitular('')
+                                            setNumero('')
+                                            setValidade('')
+                                            setCvv('')
                                         }}
                                         className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4"
                                     >
@@ -258,17 +328,17 @@ export default function CompraPage() {
                                             value={cvv}
                                             onChange={(e) => setCvv(formatarCVV(e.target.value))}
                                         />
-                                        <div className="col-span-1 md:col-span-2 flex mt-8 justify-between gap-4">
+                                        <div className="col-span-1 md:col-span-2 flex mt-8 justify-end gap-4">
                                             <button
                                                 type="button"
                                                 onClick={() => setMostrarFormulario(false)}
-                                                className="w-full py-2 rounded-xl font-semibold bg-[#BEBEBE] text-black cursor-pointer hover:bg-gray-400 transition"
+                                                className="px-6 py-2 rounded-xl font-semibold bg-[#BEBEBE] text-black cursor-pointer hover:bg-gray-400 transition"
                                             >
                                                 Voltar
                                             </button>
                                             <button
                                                 type="submit"
-                                                className="w-full py-2 rounded-xl font-semibold bg-[#FFD06C] text-black cursor-pointer hover:bg-yellow-300 transition"
+                                                className="px-6 py-2 rounded-xl font-semibold bg-[#FFD06C] text-black cursor-pointer hover:bg-yellow-300 transition"
                                             >
                                                 Adicionar Cartão
                                             </button>
@@ -291,6 +361,93 @@ export default function CompraPage() {
                                 </div>
                             </div>
                         )}
+                    </CompraSection>
+                    <CompraSection number={3} title="Endereço de Entrega">
+
+                        <div className={`${isDark ? 'bg-[#2C323B]' : 'bg-gray-200'} p-4 rounded-md space-y-4 `}>
+                            {enderecos.map((endereco) => (
+                                <div
+                                    key={endereco.id}
+                                    className={`flex items-center justify-between ${isDark ? 'bg-[#39424E]' : 'bg-white'} shadow-xl rounded-md p-3 w-full text-left transition border
+                                    ${selecionadoEndereco === endereco.id ? 'border-yellow-400' : 'border-transparent'}`}
+                                >
+                                    <div className="flex flex-col cursor-pointer" onClick={() => selecionarEndereco(endereco.id)}>
+                                        <p className={`text-sm font-medium ${isDark ? 'text-white' : 'text-black'}`}>
+                                            {endereco.rua}, {endereco.numero} - {endereco.bairro}
+                                        </p>
+                                        <p className="text-gray-400 text-xs">{endereco.cidade} - {endereco.cep}</p>
+                                    </div>
+                                    <button
+                                        onClick={() => removerEndereco(endereco.id)}
+                                        className="ml-4 text-red-400 hover:text-red-600"
+                                    >
+                                        <FiTrash2 size={18} />
+                                    </button>
+                                </div>
+                            ))}
+
+                            <button
+                                onClick={() => setMostrarFormularioEndereco(true)}
+                                className={`flex items-center gap-4 transition ${isDark ? 'text-indigo-300 hover:text-indigo-400' : 'text-gray-700 hover:text-black'}`}
+                            >
+                                <div className="w-12 h-8 rounded-md flex items-center justify-center">
+                                    <FiPlus size={20} />
+                                </div>
+                                <span className="text-sm font-medium">Adicionar Um Novo Endereço</span>
+                            </button>
+
+                            {mostrarFormularioEndereco && (
+                                <form
+                                    onSubmit={(e) => {
+                                        e.preventDefault();
+
+                                        const isValido = validarEnderecoCompleto(novoEndereco);
+
+                                        if (!isValido) {
+                                            const novosErros = obterCamposComErro(novoEndereco);
+                                            alert('Preencha todos os campos obrigatórios corretamente.');
+                                            return;
+                                        }
+
+                                        adicionarEndereco(novoEndereco);
+                                        setNovoEndereco({ cep: '', cidade: '', rua: '', numero: '', bairro: '', complemento: '', estado: '' });
+                                        setMostrarFormularioEndereco(false);
+                                    }}
+                                    className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4"
+                                >
+                                    {['cep', 'cidade', 'rua', 'numero', 'bairro', 'complemento', 'estado'].map((field) => (
+                                        <input
+                                            key={field}
+                                            name={field}
+                                            value={novoEndereco[field]}
+                                            onChange={handleChangeEndereco}
+                                            placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
+                                            className={`py-2 px-4 rounded-md shadow w-full transition
+            ${isDark ? 'bg-[#1C2127] text-white' : 'bg-white text-black'}
+        `}
+                                        />
+                                    ))}
+                                    <div className="col-span-1 md:col-span-2 flex justify-end gap-4 mt-6">
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setMostrarFormularioEndereco(false)
+                                                setErrosEndereco({})
+                                            }}
+                                            className="px-6 py-2 rounded-xl bg-gray-400 text-black font-semibold hover:bg-gray-500 transition"
+                                        >
+                                            Voltar
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            className="px-6 py-2 rounded-xl font-semibold bg-[#FFD06C] text-black cursor-pointer hover:bg-yellow-300 transition"
+                                        >
+                                            Usar Esse Endereço
+                                        </button>
+                                    </div>
+                                </form>
+                            )}
+                        </div>
                     </CompraSection>
                 </div>
 

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { FiTrash2, FiPlus, FiBox, FiTag, FiShoppingCart, FiMapPin } from 'react-icons/fi'
+import { FiTrash2, FiEdit3, FiBox, FiTag, FiShoppingCart, FiMapPin } from 'react-icons/fi'
 import useThemeStore from '@/app/stores/ThemeStore'
 import ProtectedRoute from '@/components/ProtectedRoute'
 import usePerfilStore from '../stores/PerfilStore'
@@ -32,6 +32,9 @@ export default function ProdutosFornecedorPage() {
     const [produtos, setProdutos] = useState<Product[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
+
+    const [produtoEditandoId, setProdutoEditandoId] = useState<string | null>(null)
+    const [novaQuantidade, setNovaQuantidade] = useState<number>(0)
     const fornecedorId = getIdFromToken();
     const token = perfil?.token;
 
@@ -197,6 +200,31 @@ export default function ProdutosFornecedorPage() {
             </div>
         </div>
     )
+    const iniciarEdicao = (produto: Product) => {
+        setProdutoEditandoId(produto.id)
+        setNovaQuantidade(produto.quantidade)
+    }
+    const salvarNovaQuantidade = async () => {
+        if (!produtoEditandoId) return;
+        await atualizarProduto(produtoEditandoId, { quantidade: novaQuantidade });
+        setProdutoEditandoId(null);
+    }
+
+    const atualizarProduto = async (id: string, camposAtualizados: Partial<Product>) => {
+        try {
+            // colocar aq a chamada pra api
+            console.log(`Atualizando produto ${id}:`, camposAtualizados)
+
+            setProdutos((prev) =>
+                prev.map((produto) =>
+                    produto.id === id ? { ...produto, ...camposAtualizados } : produto
+                )
+            )
+        } catch (error) {
+            console.error('Erro ao atualizar produto:', error)
+            alert('Erro ao atualizar produto')
+        }
+    }
 
     return (
         <ProtectedRoute>
@@ -240,11 +268,42 @@ export default function ProdutosFornecedorPage() {
                                                     <div className="text-xs text-gray-400 mb-1">Preço Original</div>
                                                     <div className="text-sm text-gray-400 line-through">R$ {produto.originalPrice.toFixed(2)}</div>
                                                 </td>
-                                                <td className="p-3 text-lg font-semibold">{produto.quantidade}</td>
-                                                <td className="p-0 rounded-r-md">
+                                                <td className="p-3 text-lg font-semibold">
+                                                    {produtoEditandoId === produto.id ? (
+                                                        <input
+                                                            type="number"
+                                                            value={novaQuantidade}
+                                                            autoFocus
+                                                            onChange={(e) => setNovaQuantidade(Number(e.target.value))}
+                                                            onBlur={salvarNovaQuantidade}
+                                                            onKeyDown={(e) => {
+                                                                if (e.key === 'Enter') salvarNovaQuantidade()
+                                                                if (e.key === 'Escape') setProdutoEditandoId(null)
+                                                            }}
+                                                            className="w-16 p-1 rounded border border-gray-300 bg-white text-black"
+                                                        />
+                                                    ) : (
+                                                        produto.quantidade
+                                                    )}
+                                                </td>                                                <td className="p-0 rounded-r-md">
                                                     <div className="w-full h-full flex items-center justify-center">
                                                         <div className="w-full h-full flex items-start justify-start px-3 ">
-                                                            <button onClick={() => handleDelete(produto.id)} className="cursor-pointer text-red-500 text-xl hover:text-red-600"><FiTrash2 /></button>
+                                                            <div className="flex items-center gap-2">
+                                                                <button
+                                                                    onClick={() => iniciarEdicao(produto)}
+                                                                    className="cursor-pointer text-blue-500 text-lg hover:text-blue-600"
+                                                                    title="Editar Estoque"
+                                                                >
+                                                                    <FiEdit3 />
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => handleDelete(produto.id)}
+                                                                    className="cursor-pointer text-red-500 text-xl hover:text-red-600"
+                                                                    title="Excluir Produto"
+                                                                >
+                                                                    <FiTrash2 />
+                                                                </button>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </td>
