@@ -36,11 +36,8 @@ export default function CartSidebar() {
 
   const finalizarCompra = () => {
     setIsCartOpen(false)
-    if (!perfil?.token) {
-      router.push('/login')
-    } else {
-      router.push('/compra')
-    }
+    router.push('/compra')
+    
   }
 
   return (

@@ -30,6 +30,8 @@ export default function Header() {
         { label: 'Início', path: '/' },
         { label: 'Loja', path: '/loja' },
         { label: 'Meus pedidos', path: '/pedidos' },
+        ...(perfil?.token ? [{ label: 'Meus Produtos', path: '/produtosFornecedor' }] : [])
+
     ]
 
     const isDark = theme === 'dark'

@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from 'react'
 import { FiTrash2, FiPlus, FiBox, FiTag, FiShoppingCart, FiMapPin } from 'react-icons/fi'
-import { motion, AnimatePresence } from 'framer-motion'
 import useThemeStore from '@/app/stores/ThemeStore'
+import ProtectedRoute from '@/components/ProtectedRoute'
+
 
 interface Product {
     id: string
@@ -129,6 +130,7 @@ export default function ProdutosFornecedorPage() {
     )
 
     return (
+        <ProtectedRoute>
         <main className={`min-h-screen pt-28 px-4 ${isDark ? 'bg-[#0D0D0D] text-white' : 'bg-gray-100 text-black'}`}>
             <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-8">
                 <div className="flex-1">
@@ -214,5 +216,7 @@ export default function ProdutosFornecedorPage() {
                 </div>
             </div>
         </main>
+    </ProtectedRoute>
+
     )
 }
