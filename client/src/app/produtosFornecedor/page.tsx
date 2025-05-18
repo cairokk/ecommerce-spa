@@ -75,7 +75,7 @@ export default function ProdutosFornecedorPage() {
                 }
             ]
             setProdutos(mockProdutos)
-        } catch (err) {
+        } catch {
             setError('Erro ao carregar produtos.')
         } finally {
             setLoading(false)

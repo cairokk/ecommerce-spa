@@ -112,7 +112,7 @@ export default function Home() {
           <img
             src="/gradiantglow.png"
             alt="Glow Effect"
-            className="absolute top-[-80px]  w-full h-[709px] opacity-50 pointer-events-none z-[-1] transition-opacity duration-300"
+            className="absolute top-[-80px]  w-full h-[709px] opacity-60 pointer-events-none z-[-1] transition-opacity duration-300"
           />
         )}
       </section>
