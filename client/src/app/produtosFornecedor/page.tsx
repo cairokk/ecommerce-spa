@@ -131,7 +131,7 @@ export default function ProdutosFornecedorPage() {
 
     return (
         <ProtectedRoute>
-        <main className={`min-h-screen pt-28 px-4 ${isDark ? 'bg-[#0D0D0D] text-white' : 'bg-gray-100 text-black'}`}>
+        <main className={`min-h-screen pt-28 px-4 ${isDark ? 'bg-[#000] text-white' : 'bg-gray-100 text-black'}`}>
             <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-8">
                 <div className="flex-1">
                     <h1 className="text-2xl font-bold mb-1">Produtos <span className="text-sm font-normal ml-2">{produtos.length} Produtos Cadastrados</span></h1>
@@ -141,21 +141,26 @@ export default function ProdutosFornecedorPage() {
                     ) : error ? (
                         <p className="mt-6 text-red-500">{error}</p>
                     ) : (
-                        <div className="overflow-x-auto rounded-lg mt-4">
-                            <table className={`w-full text-sm table-auto ${isDark ? 'bg-[#1E1E1E]' : 'bg-gray-300'} rounded-md`}>
-                                <thead>
+                        <div className="overflow-x-auto rounded-lg mt-4 ">
+                            <table className={`
+                                    w-full text-sm table-auto 
+                                    rounded-md 
+                                    border-separate border-spacing-y-2`}>
+                                <thead className={`${isDark ? 'bg-[#48505C]' : 'bg-gray-300'} rounded-md`}>
                                     <tr className="text-left">
-                                        <th className="p-3">Nome Do Produto</th>
+                                        <th className="p-3 rounded-l-md">Nome Do Produto</th>
                                         <th className="p-3">Detalhes</th>
                                         <th className="p-3">Preços</th>
                                         <th className="p-3">Estoque</th>
-                                        <th className="p-3">Ações</th>
+                                        <th className="p-3 rounded-r-md">Ações</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {produtos.map(produto => (
-                                        <tr key={produto.id} className={`${isDark ? 'bg-[#2A2A2A]' : 'bg-white'} border-t`}>
-                                            <td className="p-3">
+                                        <tr key={produto.id} className={`
+                                                ${isDark ? 'bg-[#272D37] hover:bg-[#323844]' : 'bg-white  rounded-md shadow-sm hover:bg-gray-100'}
+                                                transition-colors duration-200`}>
+                                            <td className="p-3 rounded-l-md" >
                                                 <span className="bg-green-400 text-black text-xs font-bold px-2 py-1 rounded">ATIVO</span>
                                                 <div className="font-semibold mt-1">{produto.name}</div>
                                             </td>
@@ -167,10 +172,10 @@ export default function ProdutosFornecedorPage() {
                                                 <div className="text-sm text-gray-400 line-through">R$ {produto.originalPrice.toFixed(2)}</div>
                                             </td>
                                             <td className="p-3 text-lg font-semibold">{produto.quantidade}</td>
-                                            <td className="p-0">
+                                            <td className="p-0 rounded-r-md">
                                                 <div className="w-full h-full flex items-center justify-center">
-                                                    <div className="w-full h-full flex items-start justify-start ">
-                                                        <button onClick={() => handleDelete(produto.id)} className="text-red-500 text-xl hover:text-red-600"><FiTrash2 /></button>
+                                                    <div className="w-full h-full flex items-start justify-start px-3 ">
+                                                        <button onClick={() => handleDelete(produto.id)} className="cursor-pointer text-red-500 text-xl hover:text-red-600"><FiTrash2 /></button>
                                                     </div>
                                                 </div>
                                             </td>
@@ -182,7 +187,8 @@ export default function ProdutosFornecedorPage() {
                     )}
                 </div>
 
-                <div className={`w-full lg:w-[360px] border rounded-lg p-6 ${isDark ? 'border-gray-700 bg-[#1C2127]' : 'border-gray-300 bg-white'} text-sm`}>
+                <div className={`w-full lg:w-[360px] mt-13 border rounded-lg p-6 
+                    ${isDark ? 'border-gray-700 bg-gradient-to-b from-[#2C323B] to-[#232527]' : 'border-gray-300 bg-white'} text-sm`}>                    
                     <h2 className="text-lg font-semibold mb-4">Criar Novo Produto</h2>
                     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                         {renderInput('Nome do Produto', <FiBox />, { name: 'name', placeholder: 'Nome Do Produto', value: form.name, onChange: handleChange, required: true })}
@@ -211,7 +217,7 @@ export default function ProdutosFornecedorPage() {
                                 <option value="Forte">Forte</option>
                             </select>
                         </div>
-                        <button type="submit" className="w-full py-2 rounded bg-yellow-500 text-black font-semibold hover:bg-yellow-400 transition">Cadastrar Produto</button>
+                        <button type="submit" className="w-full py-2 rounded bg-[#FFD06C] text-black font-semibold hover:bg-yellow-100 transition">Cadastrar Produto</button>
                     </form>
                 </div>
             </div>
