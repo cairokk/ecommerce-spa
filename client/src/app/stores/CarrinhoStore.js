@@ -25,14 +25,19 @@ const useCarrinhoStore = create((set) => ({
         if (index !== -1) {
             const atual = produtos[index];
             const novaQuantidade = atual.quantidade + 1;
-            if (novaQuantidade <= novoProduto.quantidade) {
+
+            if (novaQuantidade <= atual.estoque) {
                 produtos[index] = {
                     ...atual,
                     quantidade: novaQuantidade,
                 };
-            } 
+            }
         } else {
-            produtos.push({ ...novoProduto, quantidade: 1 });
+            produtos.push({
+                ...novoProduto,
+                quantidade: 1,
+                estoque: novoProduto.quantidade,
+            });
         }
 
         const total = produtos.reduce((acc, item) => acc + item.discountedPrice * item.quantidade, 0);
@@ -47,7 +52,6 @@ const useCarrinhoStore = create((set) => ({
             },
         };
     }),
-
     diminuirQuantidade: (id) => set((state) => {
         let produtos = state.carrinho.produtos.map((produto) =>
             produto.id === id ? { ...produto, quantidade: produto.quantidade - 1 } : produto

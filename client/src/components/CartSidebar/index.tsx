@@ -4,6 +4,8 @@ import { FiX } from 'react-icons/fi'
 import { FaTrashAlt } from 'react-icons/fa'
 import useCarrinhoStore from '../../app/stores/CarrinhoStore.js'
 import useThemeStore from '@/app/stores/ThemeStore'
+import { useRouter } from 'next/navigation'
+import usePerfilStore from '../../app/stores/PerfilStore.js'
 
 type CartItem = {
   id: number;
@@ -29,6 +31,17 @@ export default function CartSidebar() {
   const cartItems: CartItem[] = carrinho?.produtos || []
   const { diminuirQuantidade } = useCarrinhoStore((state) => state)
 
+  const router = useRouter()
+  const { perfil } = usePerfilStore((state) => state)
+
+  const finalizarCompra = () => {
+    setIsCartOpen(false)
+    if (!perfil?.token) {
+      router.push('/login')
+    } else {
+      router.push('/compra')
+    }
+  }
 
   return (
     <>
@@ -95,12 +108,14 @@ export default function CartSidebar() {
         </div>
 
         <div className="p-4 border-t border-gray-300 dark:border-gray-700">
-          <button
-            onClick={() => setIsCartOpen(false)}
-            className="bg-black text-white w-full py-2 rounded-md cursor-pointer hover:bg-gray-800 transition-colors duration-300"
-          >
-            Finalizar Compra
-          </button>
+          <div className="p-4 border-t border-gray-300 dark:border-gray-700">
+            <button
+              onClick={finalizarCompra}
+              className="bg-black text-white w-full py-2 rounded-md cursor-pointer hover:bg-gray-800 transition-colors duration-300"
+            >
+              Finalizar Compra
+            </button>
+          </div>
         </div>
       </aside>
     </>
