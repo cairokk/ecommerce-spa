@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react'
 import { FiTrash2, FiEdit3, FiBox, FiTag, FiShoppingCart, FiMapPin } from 'react-icons/fi'
 import useThemeStore from '@/app/stores/ThemeStore'
 import ProtectedRoute from '@/components/ProtectedRoute'
+import usePerfilStore from '../stores/PerfilStore'
+import axios from 'axios'
 
 
 interface Product {
@@ -20,8 +22,12 @@ interface Product {
 }
 
 export default function ProdutosFornecedorPage() {
-    const { theme } = useThemeStore()
-    const isDark = theme === 'dark'
+    const { theme } = useThemeStore();
+    const isDark = theme === 'dark';
+
+    // const perfil = usePerfilStore((state) => state.perfil);
+    // const getIdFromToken = usePerfilStore((state) => state.getIdFromToken);
+    const { perfil, getIdFromToken } = usePerfilStore((state) => state)
 
     const [produtos, setProdutos] = useState<Product[]>([])
     const [loading, setLoading] = useState(true)
@@ -29,6 +35,8 @@ export default function ProdutosFornecedorPage() {
 
     const [produtoEditandoId, setProdutoEditandoId] = useState<string | null>(null)
     const [novaQuantidade, setNovaQuantidade] = useState<number>(0)
+    const fornecedorId = getIdFromToken();
+    const token = perfil?.token;
 
     const [form, setForm] = useState({
         id: '',
@@ -51,34 +59,47 @@ export default function ProdutosFornecedorPage() {
     const fetchProdutos = async () => {
         try {
             setLoading(true)
-            const mockProdutos: Product[] = [
-                {
-                    id: '1',
-                    idFornecedor: 1,
-                    name: 'Cápsulas Nespresso',
-                    originalPrice: 650.99,
-                    discountedPrice: 350.99,
-                    quantidade: 13,
-                    origin: 'Brasil',
-                    intensity: 'Leve',
-                    category: 'Cappuccino',
-                    beans: 'Arábica'
-                },
-                {
-                    id: '2',
-                    idFornecedor: 1,
-                    name: 'Café Premium',
-                    originalPrice: 40.00,
-                    discountedPrice: 28.50,
-                    quantidade: 7,
-                    origin: 'Colômbia',
-                    intensity: 'Forte',
-                    category: 'Espresso',
-                    beans: 'Blend'
+
+            const resposta = await axios.get(`http://localhost:8084/produtos/fornecedor/${fornecedorId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
                 }
-            ]
-            setProdutos(mockProdutos)
-        } catch {
+            });
+
+            const produtosData = resposta.data
+            if (produtosData.length === 0) {
+                setError('Nenhum produto encontrado.')
+            } else {
+                setProdutos(produtosData)
+            }
+            // const mockProdutos: Product[] = [
+            //     {
+            //         id: '1',
+            //         idFornecedor: 1,
+            //         name: 'Cápsulas Nespresso',
+            //         originalPrice: 650.99,
+            //         discountedPrice: 350.99,
+            //         quantidade: 13,
+            //         origin: 'Brasil',
+            //         intensity: 'Leve',
+            //         category: 'Cappuccino',
+            //         beans: 'Arábica'
+            //     },
+            //     {
+            //         id: '2',
+            //         idFornecedor: 1,
+            //         name: 'Café Premium',
+            //         originalPrice: 40.00,
+            //         discountedPrice: 28.50,
+            //         quantidade: 7,
+            //         origin: 'Colômbia',
+            //         intensity: 'Forte',
+            //         category: 'Espresso',
+            //         beans: 'Blend'
+            //     }
+            // ]
+            // setProdutos(mockProdutos)
+        } catch (err) {
             setError('Erro ao carregar produtos.')
         } finally {
             setLoading(false)
@@ -93,14 +114,23 @@ export default function ProdutosFornecedorPage() {
         }))
     }
 
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         try {
             const novoProduto: Product = {
                 ...form,
-                id: (produtos.length + 1).toString(),
-                idFornecedor: 1
+                idFornecedor: fornecedorId
             }
+
+            const response = await axios.post(
+                'http://localhost:8084/produtos', novoProduto, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}` // se necessário
+                }
+            });
+
             setProdutos(prev => [...prev, novoProduto])
             setForm({
                 id: '', name: '', originalPrice: 0, discountedPrice: 0,
@@ -114,6 +144,13 @@ export default function ProdutosFornecedorPage() {
 
     const handleDelete = async (id: string) => {
         try {
+
+            await axios.delete(`http://localhost:8084/produtos/${id}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+
             setProdutos(produtos.filter(p => p.id !== id))
         } catch (err) {
             console.error('Erro ao deletar produto:', err)
@@ -137,18 +174,35 @@ export default function ProdutosFornecedorPage() {
     }
     const salvarNovaQuantidade = async () => {
         if (!produtoEditandoId) return;
-        await atualizarProduto(produtoEditandoId, { quantidade: novaQuantidade });
-        setProdutoEditandoId(null);
-    }
 
-    const atualizarProduto = async (id: string, camposAtualizados: Partial<Product>) => {
+        const produtoOriginal = produtos.find(p => p.id === produtoEditandoId);
+        if (!produtoOriginal) return;
+
+        const produtoAtualizado = {
+            ...produtoOriginal,
+            quantidade: novaQuantidade
+        };
+
+        await atualizarProduto(produtoEditandoId, produtoAtualizado);
+        setProdutoEditandoId(null);
+    };
+
+    const atualizarProduto = async (id: string, produtoAtualizado: Product) => {
+
+
         try {
-            // colocar aq a chamada pra api
-            console.log(`Atualizando produto ${id}:`, camposAtualizados)
+            const response = await axios.put(
+                `http://localhost:8084/produtos/${id}`, produtoAtualizado, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}` // se necessário
+                }
+            });
+     
 
             setProdutos((prev) =>
                 prev.map((produto) =>
-                    produto.id === id ? { ...produto, ...camposAtualizados } : produto
+                    produto.id === id ? { ...produto, ...produtoAtualizado } : produto
                 )
             )
         } catch (error) {
