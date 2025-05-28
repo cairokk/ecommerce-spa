@@ -77,7 +77,8 @@ export default function RegisterPage() {
         if (Object.keys(newErrors).length > 0) return
 
         try {
-            await axios.post('http://localhost:8084/clientes/auth/registrar', formData)
+            const baseUrl = process.env.NEXT_PUBLIC_API_GATEWAY_URL;
+            await axios.post(`${baseUrl}/clientes/auth/registrar`, formData)
             router.push('/login')
         } catch {
             setMensagem('Erro ao registrar. Verifique os dados e tente novamente.')

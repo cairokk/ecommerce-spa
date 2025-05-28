@@ -13,8 +13,7 @@ import useEnderecoStore from '@/app/stores/EnderecoStore'
 import usePerfilStore from '@/app/stores/PerfilStore'
 import {
     validarEnderecoCompleto,
-    obterCamposComErro,
-    formatarCEP,
+    obterCamposComErro
 } from '../../utils/enderecoUtils'
 
 import {
@@ -40,7 +39,7 @@ export default function CompraPage() {
     const { enderecos, adicionarEndereco, selecionadoEndereco, selecionarEndereco, removerEndereco } = useEnderecoStore()
 
     const [metodoPagamento, setMetodoPagamento] = useState<'cartao' | 'pix'>('cartao')
-    const [selectedIds, setSelectedIds] = useState<number[]>(carrinho.produtos.map(p => p.id))
+    const [selectedIds, setSelectedIds] = useState<number[]>(carrinho.produtos.map((p: any) => p.id))
     const [mostrarFormulario, setMostrarFormulario] = useState(false)
     const [mostrarFormularioEndereco, setMostrarFormularioEndereco] = useState(false)
 
@@ -53,7 +52,7 @@ export default function CompraPage() {
         cep: '', cidade: '', rua: '', numero: '', bairro: '', complemento: '', estado: ''
     })
 
-    const handleChangeEndereco = (e) => {
+    const handleChangeEndereco = (e: any) => {
         const { name, value } = e.target;
 
         const camposNumericos = ['cep', 'numero'];
@@ -112,8 +111,8 @@ export default function CompraPage() {
         )
     }
 
-    const produtosSelecionados = carrinho.produtos.filter(p => selectedIds.includes(p.id))
-    const totalSelecionado = produtosSelecionados.reduce((acc, item) => acc + item.discountedPrice * item.quantidade, 0)
+    const produtosSelecionados = carrinho.produtos.filter((p: any) => selectedIds.includes(p.id))
+    const totalSelecionado = produtosSelecionados.reduce((acc: any, item: any) => acc + item.discountedPrice * item.quantidade, 0)
 
     const confirmarPedido = async () => {
         if (produtosSelecionados.length === 0) {
@@ -130,13 +129,13 @@ export default function CompraPage() {
             return
         }
 
-        const cartaoSelecionado = cartoes.find(c => c.id === selecionado)
-        const enderecoSelecionado = enderecos.find(e => e.id === selecionadoEndereco)
+        const cartaoSelecionado = cartoes.find((c: any) => c.id === selecionado)
+        const enderecoSelecionado = enderecos.find((e: any) => e.id === selecionadoEndereco)
         const { id, ...enderecoSemId } = enderecoSelecionado || {};
 
         const pedidoPayload = {
             customerId: userID,
-            items: produtosSelecionados.map(p => ({
+            items: produtosSelecionados.map((p: any) => ({
                 productId: p.id,
                 quantity: p.quantidade,
             })),
@@ -150,14 +149,14 @@ export default function CompraPage() {
             } : null,
             enderecoEntrega: enderecoSemId,
         }
-
+        const baseUrl = process.env.NEXT_PUBLIC_API_GATEWAY_URL;
         const response = await axios.post(
-                `http://localhost:8084/pedidos`, pedidoPayload, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`
-                }
-            });
+            `${baseUrl}/pedidos`, pedidoPayload, {
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`
+            }
+        });
         // Aqui deixar a chamada  pra api 
 
         clearCarrinho()
@@ -173,7 +172,7 @@ export default function CompraPage() {
                     <h1 className="text-2xl font-bold">Finalizar Compras</h1>
 
                     <CompraSection number={1} title="Escolha os Itens a Serem Comprados">
-                        {carrinho.produtos.map((item) => (
+                        {carrinho.produtos.map((item: any) => (
                             <div
                                 key={item.id}
                                 className={`flex flex-col md:flex-row justify-between items-center gap-4 p-5 rounded-xl ${isDark ? 'bg-[#2C323B]' : 'bg-white border border-gray-200'}`}
@@ -260,7 +259,7 @@ export default function CompraPage() {
 
                         {metodoPagamento === 'cartao' && (
                             <div className={`${isDark ? 'bg-[#2C323B]' : 'bg-gray-200'} p-4 rounded-md space-y-4`}>
-                                {cartoes.map((cartao) => (
+                                {cartoes.map((cartao: any) => (
                                     <div
                                         key={cartao.id}
                                         className={`flex items-center justify-between ${isDark ? 'bg-[#39424E]' : 'bg-white'} shadow-xl rounded-md p-3 w-full text-left transition border 
@@ -377,7 +376,7 @@ export default function CompraPage() {
                     <CompraSection number={3} title="Endereço de Entrega">
 
                         <div className={`${isDark ? 'bg-[#2C323B]' : 'bg-gray-200'} p-4 rounded-md space-y-4 `}>
-                            {enderecos.map((endereco) => (
+                            {enderecos.map((endereco: any) => (
                                 <div
                                     key={endereco.id}
                                     className={`flex items-center justify-between ${isDark ? 'bg-[#39424E]' : 'bg-white'} shadow-xl rounded-md p-3 w-full text-left transition border
@@ -431,7 +430,7 @@ export default function CompraPage() {
                                         <input
                                             key={field}
                                             name={field}
-                                            value={novoEndereco[field]}
+                                            value={novoEndereco[field as keyof typeof novoEndereco]}
                                             onChange={handleChangeEndereco}
                                             placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
                                             className={`py-2 px-4 rounded-md shadow w-full transition
@@ -466,7 +465,7 @@ export default function CompraPage() {
                 <aside className={`w-full md:w-1/3 ${isDark ? 'bg-[#48505C]' : 'bg-white'} p-4 rounded-xl shadow h-fit sticky top-42`}>
                     <h2 className="font-semibold text-lg mb-4">Itens Selecionados</h2>
                     <div className="space-y-2 text-sm">
-                        {produtosSelecionados.map((item) => (
+                        {produtosSelecionados.map((item: any) => (
                             <div key={item.id} className="flex justify-between">
                                 <span>{item.name}</span>
                                 <span>R$ {(item.discountedPrice * item.quantidade).toFixed(2)}</span>

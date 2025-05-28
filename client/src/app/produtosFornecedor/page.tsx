@@ -38,6 +38,8 @@ export default function ProdutosFornecedorPage() {
     const fornecedorId = getIdFromToken();
     const token = perfil?.token;
 
+    const baseUrl = process.env.NEXT_PUBLIC_API_GATEWAY_URL;
+
     const [form, setForm] = useState({
         id: '',
         name: '',
@@ -59,8 +61,7 @@ export default function ProdutosFornecedorPage() {
     const fetchProdutos = async () => {
         try {
             setLoading(true)
-
-            const resposta = await axios.get(`http://localhost:8084/produtos/fornecedor/${fornecedorId}`, {
+            const resposta = await axios.get(`${baseUrl}/produtos/fornecedor/${fornecedorId}`, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
@@ -122,9 +123,8 @@ export default function ProdutosFornecedorPage() {
                 ...form,
                 idFornecedor: fornecedorId
             }
-
             const response = await axios.post(
-                'http://localhost:8084/produtos', novoProduto, {
+                `${baseUrl}/produtos`, novoProduto, {
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${token}` // se necessário
@@ -143,9 +143,8 @@ export default function ProdutosFornecedorPage() {
     }
 
     const handleDelete = async (id: string) => {
-        try {
-
-            await axios.delete(`http://localhost:8084/produtos/${id}`, {
+        try {   
+            await axios.delete(`${baseUrl}/produtos/${id}`, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
@@ -159,7 +158,7 @@ export default function ProdutosFornecedorPage() {
 
     const inputClass = `${isDark ? 'bg-[#1C2127] text-white' : 'bg-white text-black'} p-2 rounded shadow pl-10 w-full`
 
-    const renderInput = (label, icon, props) => (
+    const renderInput = (label:any, icon:any, props:any) => (
         <div className="w-full">
             <label className="block text-xs mb-1 ml-1 text-gray-400">{label}</label>
             <div className="relative">
@@ -191,8 +190,9 @@ export default function ProdutosFornecedorPage() {
 
 
         try {
+            
             const response = await axios.put(
-                `http://localhost:8084/produtos/${id}`, produtoAtualizado, {
+                `${baseUrl}/produtos/${id}`, produtoAtualizado, {
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${token}` // se necessário

@@ -31,7 +31,8 @@ export default function LoginPage() {
         }
 
         try {
-            const resposta = await fetch('http://localhost:8084/clientes/auth/login', {
+            const baseUrl = process.env.NEXT_PUBLIC_API_GATEWAY_URL;
+            const resposta = await fetch(`${baseUrl}/clientes/auth/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData),

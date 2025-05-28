@@ -56,7 +56,8 @@ export default function PedidosPage() {
 
     const fetchPedidos = async () => {
         try {
-            const resposta = await axios.get(`http://localhost:8084/pedidos/usuario/${userID}`, {
+            const baseUrl = process.env.NEXT_PUBLIC_API_GATEWAY_URL;
+            const resposta = await axios.get(`${baseUrl}/pedidos/usuario/${userID}`, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
@@ -69,7 +70,7 @@ export default function PedidosPage() {
 
     const pedidosFiltrados = statusFilter === 'Todos'
         ? pedidos
-        : pedidos.filter(pedido => pedido.status === statusFilter)
+        : pedidos.filter((pedido:any) => pedido.status === statusFilter)
 
     return (
         <main

@@ -19,7 +19,7 @@ export default function Store() {
 
     async function getProdutos() {
         try {
-            const resposta = await axios.get('http://localhost:8084/produtos', {
+            const resposta = await axios.get('http://${process.env.NEXT_PUBLIC_API_GATEWAY_URL}/produtos', {
                 headers: {}
             });
             setProdutos(resposta.data);

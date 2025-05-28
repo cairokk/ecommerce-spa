@@ -1,0 +1,52 @@
+name: Deploy SPA no ECR
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-and-push:
+    name: Build e Push da imagem para o ECR
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Instalar dependências
+        run: npm install
+
+      - name: Build do Frontend
+        run: npm run build
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-east-2
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Login no Amazon ECR
+        run: |
+          aws ecr get-login-password --region us-east-2 | \
+          docker login --username AWS --password-stdin 727169793826.dkr.ecr.us-east-2.amazonaws.com
+
+      - name: Build da imagem Docker
+        run: docker build -t frontend .
+
+      - name: Tag da imagem com o URI do repositório
+        run: docker tag frontend:latest 727169793826.dkr.ecr.us-east-2.amazonaws.com/ecommerce/spa:latest
+
+      - name: Push da imagem para o ECR
+        run: docker push 727169793826.dkr.ecr.us-east-2.amazonaws.com/ecommerce/spa:latest
