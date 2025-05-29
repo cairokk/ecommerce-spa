@@ -28,9 +28,9 @@ jobs:
 
 
       - name: Tag da imagem
-        run: docker tag spa:latest 727169793826.dkr.ecr.us-east-2.amazonaws.com/spa:latest
+        run: docker tag spa:latest 727169793826.dkr.ecr.us-east-2.amazonaws.com/ecommerce/spa:latest
 
       - name: Push da imagem para o ECR
-        run: docker push 727169793826.dkr.ecr.us-east-2.amazonaws.com/spa:latest
+        run: docker push 727169793826.dkr.ecr.us-east-2.amazonaws.com/ecommerce/spa:latest
 
 
