@@ -19,7 +19,9 @@ export default function Store() {
 
     async function getProdutos() {
         try {
-            const resposta = await axios.get('http://${process.env.NEXT_PUBLIC_API_GATEWAY_URL}/produtos', {
+            const baseUrl = process.env.NEXT_PUBLIC_API_GATEWAY_URL;
+            `{baseUrl}`
+            const resposta = await axios.get(`${baseUrl}/produtos`, {
                 headers: {}
             });
             setProdutos(resposta.data);
@@ -119,10 +121,10 @@ export default function Store() {
                                     key={cat}
                                     onClick={() => toggleCategory(cat)}
                                     className={`px-5 py-2 rounded-full text-sm font-medium border transition-colors duration-300 ${isSelected
-                                            ? 'bg-[#8EA4DF] text-white border-transparent'
-                                            : isDark
-                                                ? 'bg-[#535D77] text-[#e1e1e1] border-gray-600 hover:bg-[#8EA4DF]'
-                                                : 'bg-[#e0e0e0] text-[#222222] border-gray-400 hover:bg-[#8EA4DF] hover:text-white'
+                                        ? 'bg-[#8EA4DF] text-white border-transparent'
+                                        : isDark
+                                            ? 'bg-[#535D77] text-[#e1e1e1] border-gray-600 hover:bg-[#8EA4DF]'
+                                            : 'bg-[#e0e0e0] text-[#222222] border-gray-400 hover:bg-[#8EA4DF] hover:text-white'
                                         }`}
                                 >
                                     {cat}
