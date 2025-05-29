@@ -1,3 +1,9 @@
+name: Deploy Front-end no ECR
+
+on:
+  push:
+    branches: [ main, master ]
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -25,3 +31,5 @@ jobs:
 
       - name: Push da imagem para o ECR
         run: docker push 727169793826.dkr.ecr.us-east-2.amazonaws.com/spa:latest
+
+
