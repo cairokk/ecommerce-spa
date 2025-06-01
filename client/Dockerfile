@@ -8,6 +8,10 @@ RUN npm install
 
 # Copia o restante do projeto e executa o build
 COPY . .
+
+ARG NEXT_PUBLIC_API_GATEWAY_URL
+ENV NEXT_PUBLIC_API_GATEWAY_URL=$NEXT_PUBLIC_API_GATEWAY_URL
+
 RUN npm run build
 
 # Etapa de produção
