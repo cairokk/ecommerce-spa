@@ -38,7 +38,7 @@ export default function ProdutosFornecedorPage() {
     const fornecedorId = getIdFromToken();
     const token = perfil?.token;
 
-    const baseUrl = process.env.NEXT_PUBLIC_API_GATEWAY_URL;
+    const baseUrl = process.env.NEXT_PUBLIC_API_GATEWAY_URL ? process.env.NEXT_PUBLIC_API_GATEWAY_URL : "http://3.128.0.2:8084";
 
     const [form, setForm] = useState({
         id: '',

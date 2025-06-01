@@ -31,7 +31,7 @@ export default function LoginPage() {
         }
 
         try {
-            const baseUrl = process.env.NEXT_PUBLIC_API_GATEWAY_URL;
+            const baseUrl = process.env.NEXT_PUBLIC_API_GATEWAY_URL ? process.env.NEXT_PUBLIC_API_GATEWAY_URL : "http://3.128.0.2:8084";
             const resposta = await fetch(`${baseUrl}/clientes/auth/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

@@ -77,7 +77,7 @@ export default function RegisterPage() {
         if (Object.keys(newErrors).length > 0) return
 
         try {
-            const baseUrl = process.env.NEXT_PUBLIC_API_GATEWAY_URL;
+            const baseUrl = process.env.NEXT_PUBLIC_API_GATEWAY_URL ? process.env.NEXT_PUBLIC_API_GATEWAY_URL : "http://3.128.0.2:8084";
             await axios.post(`${baseUrl}/clientes/auth/registrar`, formData)
             router.push('/login')
         } catch {

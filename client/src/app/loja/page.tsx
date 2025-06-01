@@ -19,7 +19,7 @@ export default function Store() {
 
     async function getProdutos() {
         try {
-            const baseUrl = process.env.NEXT_PUBLIC_API_GATEWAY_URL;
+            const baseUrl = process.env.NEXT_PUBLIC_API_GATEWAY_URL ? process.env.NEXT_PUBLIC_API_GATEWAY_URL : "http://3.128.0.2:8084";
             console.log('Base URL:', baseUrl);
             const resposta = await axios.get(`${baseUrl}/produtos`, {
                 headers: {}

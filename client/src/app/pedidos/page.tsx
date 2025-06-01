@@ -56,7 +56,7 @@ export default function PedidosPage() {
 
     const fetchPedidos = async () => {
         try {
-            const baseUrl = process.env.NEXT_PUBLIC_API_GATEWAY_URL;
+            const baseUrl = process.env.NEXT_PUBLIC_API_GATEWAY_URL ? process.env.NEXT_PUBLIC_API_GATEWAY_URL : "http://3.128.0.2:8084";
             const resposta = await axios.get(`${baseUrl}/pedidos/usuario/${userID}`, {
                 headers: {
                     Authorization: `Bearer ${token}`
