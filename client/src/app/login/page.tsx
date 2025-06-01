@@ -6,6 +6,8 @@ import usePerfilStore from '@/app/stores/PerfilStore'
 import { FiLogIn, FiMail, FiLock } from 'react-icons/fi'
 import useThemeStore from '@/app/stores/ThemeStore'
 import Link from 'next/link'
+import { urlGateway } from '@/app/constants'
+
 
 export default function LoginPage() {
     const router = useRouter()
@@ -31,7 +33,7 @@ export default function LoginPage() {
         }
 
         try {
-            const baseUrl = process.env.NEXT_PUBLIC_API_GATEWAY_URL ? process.env.NEXT_PUBLIC_API_GATEWAY_URL : "http://3.128.0.2:8084";
+            const baseUrl = urlGateway
             const resposta = await fetch(`${baseUrl}/clientes/auth/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

@@ -5,6 +5,8 @@ import { FiTrash2, FiEdit3, FiBox, FiTag, FiShoppingCart, FiMapPin } from 'react
 import useThemeStore from '@/app/stores/ThemeStore'
 import ProtectedRoute from '@/components/ProtectedRoute'
 import usePerfilStore from '../stores/PerfilStore'
+import { urlGateway } from '@/app/constants'
+
 import axios from 'axios'
 
 
@@ -38,7 +40,7 @@ export default function ProdutosFornecedorPage() {
     const fornecedorId = getIdFromToken();
     const token = perfil?.token;
 
-    const baseUrl = process.env.NEXT_PUBLIC_API_GATEWAY_URL ? process.env.NEXT_PUBLIC_API_GATEWAY_URL : "http://3.128.0.2:8084";
+    const baseUrl = urlGateway
 
     const [form, setForm] = useState({
         id: '',

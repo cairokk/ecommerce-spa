@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation'
 import useThemeStore from '@/app/stores/ThemeStore'
 import usePerfilStore from '@/app/stores/PerfilStore'
 import usePedidoStore from '@/app/stores/PedidoStore'
+import { urlGateway } from '@/app/constants'
+
 import axios from 'axios'
 
 interface OrderItem {
@@ -56,7 +58,7 @@ export default function PedidosPage() {
 
     const fetchPedidos = async () => {
         try {
-            const baseUrl = process.env.NEXT_PUBLIC_API_GATEWAY_URL ? process.env.NEXT_PUBLIC_API_GATEWAY_URL : "http://3.128.0.2:8084";
+            const baseUrl = urlGateway
             const resposta = await axios.get(`${baseUrl}/pedidos/usuario/${userID}`, {
                 headers: {
                     Authorization: `Bearer ${token}`

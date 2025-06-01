@@ -6,6 +6,8 @@ import ProductCard from '@/components/ProductCard'
 import useProdutoStore from '@/app/stores/ProdutoStore'
 import useThemeStore from '@/app/stores/ThemeStore'
 import axios from 'axios'
+import { urlGateway } from '@/app/constants'
+
 import { FiSearch } from 'react-icons/fi'
 
 export default function Store() {
@@ -19,7 +21,7 @@ export default function Store() {
 
     async function getProdutos() {
         try {
-            const baseUrl = process.env.NEXT_PUBLIC_API_GATEWAY_URL ? process.env.NEXT_PUBLIC_API_GATEWAY_URL : "http://3.128.0.2:8084";
+            const baseUrl = urlGateway
             console.log('Base URL:', baseUrl);
             const resposta = await axios.get(`${baseUrl}/produtos`, {
                 headers: {}

@@ -6,6 +6,7 @@ import useCarrinhoStore from '@/app/stores/CarrinhoStore'
 import ModalRemoverProduto from '@/components/ModalRemoverProduto'
 import CompraSection from '@/components/CompraSection'
 import useCartaoStore from '@/app/stores/CartaoStore'
+import { urlGateway } from '@/app/constants'
 import { FiPlus, } from 'react-icons/fi'
 import { PiQrCodeBold } from 'react-icons/pi'
 import ProtectedRoute from '@/components/ProtectedRoute'
@@ -149,7 +150,7 @@ export default function CompraPage() {
             } : null,
             enderecoEntrega: enderecoSemId,
         }
-        const baseUrl = process.env.NEXT_PUBLIC_API_GATEWAY_URL ? process.env.NEXT_PUBLIC_API_GATEWAY_URL : "http://3.128.0.2:8084";
+        const baseUrl = urlGateway
         const response = await axios.post(
             `${baseUrl}/pedidos`, pedidoPayload, {
             headers: {

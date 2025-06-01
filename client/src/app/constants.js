@@ -1,0 +1,1 @@
+export const urlGateway = 'http://3.128.0.2:8761';
