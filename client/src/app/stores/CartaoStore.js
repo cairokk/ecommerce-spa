@@ -2,6 +2,19 @@ import { create } from 'zustand'
 import { devtools } from 'zustand/middleware';
 
 
+function generateUUID() {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  } else {
+    // Fallback manual UUID generator
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+      const r = (Math.random() * 16) | 0,
+        v = c === 'x' ? r : (r & 0x3) | 0x8;
+      return v.toString(16);
+    });
+  }
+}
+
 const useCartaoStore = create(
     devtools((set) => ({
         selecionado: null,
@@ -13,7 +26,7 @@ const useCartaoStore = create(
                     ...state.cartoes,
                     {
                         ...cartao,
-                        id: crypto.randomUUID(),
+                        id: generateUUID(),
                     },
                 ],
             })),
