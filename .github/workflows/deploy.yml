@@ -24,9 +24,8 @@ jobs:
             docker login --username AWS --password-stdin 727169793826.dkr.ecr.us-east-2.amazonaws.com
 
       - name: Build da imagem
-        run: docker build \
-          --build-arg NEXT_PUBLIC_API_GATEWAY_URL=${{ secrets.NEXT_PUBLIC_API_GATEWAY_URL }} \
-          -t spa -f client/Dockerfile client
+        run: docker build --build-arg NEXT_PUBLIC_API_GATEWAY_URL=${{ secrets.NEXT_PUBLIC_API_GATEWAY_URL }} -t spa -f client/Dockerfile client
+
 
       - name: Tag da imagem
         run: docker tag spa:latest 727169793826.dkr.ecr.us-east-2.amazonaws.com/ecommerce/spa:latest
