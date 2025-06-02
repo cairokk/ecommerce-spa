@@ -3,14 +3,18 @@
 import { useParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { pedidos } from '../../../mock/pedidos';
 import useThemeStore from '@/app/stores/ThemeStore';
+import usePedidoStore from '@/app/stores/PedidoStore';
+import { useEffect, useState } from 'react';
+import { urlGateway } from '@/app/constants'
 
 export default function PedidoPage() {
-    const params = useParams();
-    const pedidoId = params.id as string;
+    const { id } = useParams();
+    const pedidoId = Number(id);
     const { theme } = useThemeStore();
     const isDark = theme === 'dark';
+    const { pedidos } = usePedidoStore();
+    const [produtos, setProdutos] = useState<Record<number, { name: string; discountedPrice: number }>>({})
 
     const pedido = pedidos.find((p) => p.id === pedidoId);
 
@@ -28,17 +32,43 @@ export default function PedidoPage() {
         );
     }
 
-    const steps = [
-        { label: 'Pedido Realizado', active: true },
-        {
-            label: 'Aguardando Pagamento',
-            active: pedido.status === 'Aguardando Pagamento' || pedido.status === 'Saiu para Entrega',
-        },
-        {
-            label: 'Saiu para Entrega',
-            active: pedido.status === 'Saiu para Entrega',
-        },
-    ];
+    const statusEtapas = ['CRIADO', 'PAGO', 'ENVIADO', 'ENTREGUE'];
+    const indexEtapaAtual = statusEtapas.indexOf(pedido.status);
+
+    const steps = statusEtapas.map((status, index) => ({
+        label:
+            {
+                CRIADO: 'Pedido Realizado',
+                PAGO: 'Pagamento Confirmado',
+                ENVIADO: 'Saiu para Entrega',
+                ENTREGUE: 'Entregue'
+            }[status] ?? status,
+        active: index <= indexEtapaAtual
+    }));
+
+    useEffect(() => {
+        async function fetchTodosProdutos() {
+            try {
+                const resposta = await fetch(`${urlGateway}/produtos`);
+                const lista = await resposta.json();
+
+                const mapa: Record<number, { name: string; discountedPrice: number }> = {};
+                lista.forEach((produto: { id: number; name: string; discountedPrice: number }) => {
+                    mapa[produto.id] = {
+                        name: produto.name,
+                        discountedPrice: produto.discountedPrice
+                    };
+                });
+                console.log('Produtos carregados:', mapa);
+                setProdutos(mapa);
+            } catch (erro) {
+                console.error('Erro ao buscar produtos:', erro);
+            }
+        }
+
+        fetchTodosProdutos();
+    }, []);
+
 
     return (
         <main
@@ -54,7 +84,9 @@ export default function PedidoPage() {
                     backgroundColor: isDark ? '#1c1c1c' : '#f9f9f9',
                 }}
             >
-                <h1 className="text-3xl font-bold text-center mb-2">Pedido #{pedido.id}</h1>
+                <h1 className="text-3xl font-bold text-center mb-2">
+                    Pedido #{pedido.id}
+                </h1>
                 <p className={`text-center mb-6 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
                     A viagem do seu café <span className="font-bold">continua</span> — rastreie seu pedido com status em tempo real.
                 </p>
@@ -67,10 +99,10 @@ export default function PedidoPage() {
                                 animate={{ scale: 1 }}
                                 transition={{ duration: 0.3 }}
                                 className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 ${step.active
-                                        ? 'bg-black text-white'
-                                        : isDark
-                                            ? 'bg-gray-600 text-white'
-                                            : 'bg-gray-300 text-black'
+                                    ? 'bg-black text-white'
+                                    : isDark
+                                        ? 'bg-gray-600 text-white'
+                                        : 'bg-gray-300 text-black'
                                     }`}
                             >
                                 {index + 1}
@@ -90,25 +122,29 @@ export default function PedidoPage() {
                     <h2 className="font-semibold mb-4">Itens do pedido</h2>
                     <ul className="space-y-2">
                         {pedido.items.map((item, index) => (
-                            <li key={index} className="flex justify-between">
-                                <span>{item.quantity}x {item.name}</span>
-                                <span>R${item.price.toFixed(2)}</span>
+                            <li key={index} className="flex justify-between text-sm">
+                                <span>
+                                    {item.quantity}x {produtos[item.productId]?.name || `Produto ${item.productId}`}
+                                </span>
+                                <span className={isDark ? 'text-gray-300' : 'text-gray-600'}>
+                                    R${(produtos[item.productId]?.discountedPrice ?? 0 * item.quantity).toFixed(2)}
+                                </span>
                             </li>
                         ))}
                     </ul>
-                    <p className="mt-4 text-sm text-gray-500">
+                    <p className="mt-4 text-sm" style={{ color: isDark ? '#aaa' : '#555' }}>
                         Status: <strong>{pedido.status}</strong>
                     </p>
-                    <p className="text-sm text-gray-500">
-                        Total: <strong>R${pedido.total.toFixed(2)}</strong>
+                    <p className="text-sm" style={{ color: isDark ? '#aaa' : '#555' }}>
+                        Total: <strong>R$ {pedido.totalPrice.toFixed(2)}</strong>
                     </p>
                 </div>
 
                 <div className="w-full flex justify-end gap-3 items-center mt-12">
                     <button
                         className={`px-6 py-2 rounded-2xl border transition-all ${isDark
-                                ? 'border-white text-white hover:bg-white hover:text-black'
-                                : 'border-black text-black hover:bg-black hover:text-white'
+                            ? 'border-white text-white hover:bg-white hover:text-black'
+                            : 'border-black text-black hover:bg-black hover:text-white'
                             }`}
                     >
                         Ajuda

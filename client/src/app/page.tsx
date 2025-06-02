@@ -98,7 +98,7 @@ export default function Home() {
             ].map((brand) => (
               <li
                 key={brand.name}
-                className="flex-shrink-0 opacity-70 hover:opacity-100 transition-opacity duration-300 cursor-pointer"
+                className="flex-shrink-0 opacity-70 hover:opacity-100 transition-opacity duration-300"
               >
                 <img src={brand.src} alt={brand.name} className="h-10 md:h-12 object-contain" />
               </li>
