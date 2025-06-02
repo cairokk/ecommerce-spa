@@ -9,4 +9,4 @@ const usePedidoStore = create(
         addPedido: (pedido) => set((state) => ({ pedidos: [...state.pedidos, pedido] }))
     })));
 
-export default usePedidoStore;
+export default usePedidoStore;  
