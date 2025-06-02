@@ -16,7 +16,7 @@ export default function PedidoPage() {
     const { pedidos } = usePedidoStore();
     const [produtos, setProdutos] = useState<Record<number, { name: string; discountedPrice: number }>>({})
 
-    const pedido = pedidos.find((p) => p.id === pedidoId);
+    const pedido = pedidos.find((p:any) => p.id === pedidoId);
 
     if (!pedido) {
         return (
@@ -121,7 +121,7 @@ export default function PedidoPage() {
                 >
                     <h2 className="font-semibold mb-4">Itens do pedido</h2>
                     <ul className="space-y-2">
-                        {pedido.items.map((item, index) => (
+                        {pedido.items.map((item:any, index:any) => (
                             <li key={index} className="flex justify-between text-sm">
                                 <span>
                                     {item.quantity}x {produtos[item.productId]?.name || `Produto ${item.productId}`}

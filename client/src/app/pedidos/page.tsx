@@ -109,7 +109,7 @@ export default function PedidosPage() {
 
     const pedidosFiltrados = statusFilter === 'Todos'
         ? pedidos
-        : pedidos.filter(p => p.status === statusFilter)
+        : pedidos.filter((p:any) => p.status === statusFilter)
 
     return (
         <main
@@ -149,7 +149,7 @@ export default function PedidosPage() {
             </div>
 
             <div className="space-y-6 ">
-                {pedidosFiltrados.length > 0 ? pedidosFiltrados.map((pedido) => (
+                {pedidosFiltrados.length > 0 ? pedidosFiltrados.map((pedido: any) => (
                     <div
                         key={pedido.id}
                         className="rounded-xl overflow-hidden shadow-lg"
@@ -208,7 +208,7 @@ export default function PedidosPage() {
                                     </h3>
                                     <ul className="text-sm" style={{ color: isDark ? '#d4d4d4' : '#4b5563' }}>
                                         {(() => {
-                                            const agrupado = pedido.items.reduce<Record<number, number>>((acc, item) => {
+                                            const agrupado = pedido.items.reduce((acc:any, item:any) => {
                                                 acc[item.productId] = (acc[item.productId] || 0) + item.quantity;
                                                 return acc;
                                             }, {});
